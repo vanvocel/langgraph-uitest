@@ -1,0 +1,52 @@
+# Global settings
+
+project:
+  name: LangGraph-uitest
+
+browser:
+  headless: true
+  slow_mo_ms: 0
+  timeout_ms: 30000
+  locale: zh-CN
+  extra_http_headers:
+    Accept-Language: zh-CN,zh;q=0.9
+  locale: zh-CN
+  extra_http_headers:
+    Accept-Language: zh-CN,zh;q=0.9
+
+allure:
+  results_dirname: allure-results
+
+# After each `python main.py run --req <id>`, backfill 测试结果/截图/说明 into Excel.
+excel_backfill:
+  enabled: true
+  # Optional explicit source (absolute or relative to runs/<req>/).
+  # Default: runs/<req>/excel/cases.xlsx or first *.xlsx there; else Downloads/<req>*.xlsx
+  source: null
+  output_name: "{req_id}_结果回填.xlsx"
+  header_row: 2
+  data_start_row: 3
+  case_id_header: 用例ID
+  result_header: 测试结果
+  screenshot_header: 测试截图
+  note_header: 测试说明
+  search_downloads: true
+  image_width: 180
+  image_height: 100
+
+paths:
+  runs_root: runs
+  config_root: config
+  auth_root: .auth
+
+bootstrap:
+  login:
+    enabled: true
+    login_url: https://login.z-niu.com/
+    success_url_contains: main.z-niu.com
+    land_url: https://main.z-niu.com/
+    # reuse Playwright storage_state under .auth/<account_ref>.json
+    reuse_storage_state: true
+    # force UI login even if storage exists (debug)
+    force_ui_login: false
+    default_account_ref: default_tester

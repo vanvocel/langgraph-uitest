@@ -1,0 +1,14 @@
+case_id: TC-DISCOVER-001
+title: discover smoke — bind query button
+requirement_id: DISCOVER-001
+base_url: fixture://
+tags:
+- discover
+- smoke
+steps:
+- action: open
+  url: fixture://page.html
+- action: wait_visible
+  element: 查询
+- action: click
+  element: 查询

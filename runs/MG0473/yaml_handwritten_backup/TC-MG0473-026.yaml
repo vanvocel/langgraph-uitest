@@ -1,0 +1,55 @@
+case_id: TC-MG0473-026
+title: 全选五项与不选不限结果集合一致
+requirement_id: MG0473
+base_url: https://lead.z-niu.com
+tags:
+- MG0473
+- live
+- excel
+meta:
+  live_notes: 只比对当前页线索ID
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/pool/clean
+  description: 打开清洗池
+- action: wait_visible
+  element: 人工待清洗
+- action: click
+  element: 人工待清洗
+  description: 进入人工待清洗
+- action: click_if_visible
+  element: 展开筛选
+- action: click_if_visible
+  element: 全部
+- action: click_if_visible
+  element: 重置
+- action: wait_visible
+  element: 查询
+- action: clear_select
+  element: 清洗次数
+- action: click
+  element: 查询
+- action: wait_visible
+  element: 列表表格
+- action: capture_column
+  element: 线索 ID
+  value: ids_unlimited
+- action: multi_select
+  element: 清洗次数
+  value: 未清洗,首次清洗,二次清洗,三次清洗,三次及以上
+- action: click
+  element: 查询
+- action: wait_visible
+  element: 列表表格
+- action: assert_set
+  element: 线索 ID
+  expect: ids_unlimited

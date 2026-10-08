@@ -1,0 +1,17 @@
+req_id: DISCOVER-001
+needed:
+- 查询
+bound:
+  查询:
+    by: role
+    value: button
+    name: 查询
+    exact: true
+    confidence: 0.95
+kept: []
+unbound: []
+blocked: false
+backend: heuristic
+llm_profile: null
+llm_error: null
+pom: D:\Project\AI\LangGraph-uitest\runs\DISCOVER-001\pom\elements.yaml

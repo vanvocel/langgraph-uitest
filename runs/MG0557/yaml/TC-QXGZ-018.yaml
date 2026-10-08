@@ -1,0 +1,42 @@
+case_id: TC-QXGZ-018
+title: 人工清洗提交后AI清洗评分不命中按0分计
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: assert_visible
+  element: AI清洗评分
+  description: 确认场景已启用【AI清洗评分】维度
+- action: assert_text_contains
+  element: AI清洗评分
+  expect: '0'
+  description: 人工清洗提交后AI清洗评分不命中，维度得分为0
+- action: assert_hidden
+  element: AI阶段档位
+  description: 不保留此前若存在的AI阶段档位
+tags:
+- compiled
+- needs_fixture
+meta:
+  needs_review: true
+  review_notes: 用例依赖造数：需准备客资并完成人工清洗提交（最近清洗方式为人工清洗），且场景需启用【AI清洗评分】。自动集暂不执行，仅编译可 UI
+    部分。
+  compile_backend: deepseek
+  llm_profile: deepseek
+  needs_fixture: true

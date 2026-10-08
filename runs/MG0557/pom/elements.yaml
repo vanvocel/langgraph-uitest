@@ -1,0 +1,57 @@
+# Hand-bound from live probe 2026-10-08 (rule/clean → 清洗评分规则).
+# 修改 must use exact=true so it does not match 修改日志.
+page: CleanScoreRulePage
+url: https://lead.z-niu.com/rule/clean/
+elements:
+  清洗评分规则:
+    by: role
+    value: tab
+    name: 清洗评分规则
+    exact: true
+  页面:
+    by: css
+    value: body
+  修改:
+    by: role
+    value: button
+    name: 修改
+    exact: true
+  修改日志:
+    by: role
+    value: button
+    name: 修改日志
+    exact: true
+  添加渠道:
+    by: role
+    value: button
+    name: 添加渠道
+    exact: true
+  保存:
+    by: role
+    value: button
+    name: 保存
+    exact: true
+  弹窗取消:
+    by: xpath
+    value: "//div[contains(@class,'el-overlay')]//button[normalize-space()='取消']"
+  取消:
+    by: xpath
+    value: "//button[normalize-space()='取消' and not(ancestor::*[contains(@class,'el-overlay')])]"
+  渠道选择器:
+    by: xpath
+    value: "//div[contains(@class,'el-dialog')][.//*[contains(normalize-space(),'添加渠道')] or .//input[contains(@placeholder,'渠道')]]"
+  渠道搜索框:
+    by: placeholder
+    value: 搜索一级 / 二级渠道名称
+  获客渠道评分表:
+    by: text
+    value: 获客渠道评分
+    exact: true
+  AI清洗评分表:
+    by: text
+    value: AI清洗评分
+    exact: true
+  已清洗次数评分表:
+    by: text
+    value: 已清洗次数评分
+    exact: true

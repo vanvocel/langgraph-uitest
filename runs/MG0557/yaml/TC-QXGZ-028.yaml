@@ -1,0 +1,62 @@
+case_id: TC-QXGZ-028
+title: 页面展示维度分层与层差保存校验说明区
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页面
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: wait_visible
+  element: 维度分层与层差保存校验
+- action: assert_visible
+  element: 维度分层与层差保存校验
+- action: assert_text_contains
+  element: 维度分层与层差保存校验
+  expect: 阶段层
+- action: assert_text_contains
+  element: 维度分层与层差保存校验
+  expect: 渠道层
+- action: assert_text_contains
+  element: 维度分层与层差保存校验
+  expect: 质量微调层
+- action: assert_text_contains
+  element: 维度分层与层差保存校验
+  expect: 推荐量纲
+- action: assert_text_contains
+  element: 维度分层与层差保存校验
+  expect: 层差校验公式
+- action: assert_text_contains
+  element: 维度分层与层差保存校验
+  expect: AI清洗评分
+- action: assert_text_contains
+  element: 维度分层与层差保存校验
+  expect: 已清洗次数评分
+- action: assert_text_contains
+  element: 维度分层与层差保存校验
+  expect: 场景固定加分
+- action: assert_text_contains
+  element: 维度分层与层差保存校验
+  expect: 获客渠道评分
+- action: assert_text_contains
+  element: 维度分层与层差保存校验
+  expect: 来源方式评分
+tags:
+- compiled
+meta:
+  needs_review: false
+  compile_backend: deepseek
+  llm_profile: deepseek

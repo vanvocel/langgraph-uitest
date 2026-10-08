@@ -1,0 +1,52 @@
+case_id: TC-QXGZ-024
+title: 已清洗次数1/2/3/≥4次分别命中对应五档
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: wait_visible
+  element: 已清洗次数评分
+- action: assert_visible
+  element: 已清洗次数评分
+  description: 确认场景启用【已清洗次数评分】
+- action: assert_text_contains
+  element: 已首次清洗
+  expect: '5000'
+  description: 1次→【已首次清洗】5000
+- action: assert_text_contains
+  element: 已二次清洗
+  expect: '3000'
+  description: 2次→【已二次清洗】3000
+- action: assert_text_contains
+  element: 已三次清洗
+  expect: '1500'
+  description: 3次→【已三次清洗】1500
+- action: assert_text_contains
+  element: 已三次以上清洗
+  expect: '0'
+  description: ≥4次→【已三次以上清洗】0
+tags:
+- compiled
+- needs_fixture
+meta:
+  needs_review: true
+  review_notes: 用例依赖造数：需构造已清洗次数为1、2、3、4的客资并触发评分，自动集暂不执行；步骤仅编译到可 UI 部分，评分命中档位与得分需人工/接口造数后核对。
+  compile_backend: deepseek
+  llm_profile: deepseek
+  needs_fixture: true

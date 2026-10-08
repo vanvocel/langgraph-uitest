@@ -1,0 +1,5 @@
+# Requirement-scoped POM for DEMO-001 business pages.
+# Login elements live in framework/bootstrap/login_pom.yaml.
+page: MainPage
+url: https://main.z-niu.com/
+elements: {}

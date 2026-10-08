@@ -1,0 +1,48 @@
+case_id: TC-QXGZ-017
+title: AI连续外拨多轮仅按一次清洗归档且仍命中AI清洗评分
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: wait_visible
+  element: AI清洗评分
+- action: assert_visible
+  element: AI清洗评分
+  description: 前置：场景启用 AI清洗评分
+- action: assert_visible
+  element: 已清洗次数
+  description: 核对已清洗次数累计增幅
+- action: assert_text_contains
+  element: AI清洗评分
+  expect: 命中
+  description: 核对 AI清洗评分 是否命中并计分
+- action: assert_column
+  element: 列表表格
+  expect: gte:0
+  description: 连续外拨无论几轮按一次清洗口径归档，已清洗次数按一次累计口径增加，不因轮次重复累加
+tags:
+- compiled
+- manual
+- ai_outbound
+meta:
+  needs_review: true
+  review_notes: 依赖第三方 AI 外呼回传与人工造数，自动集不执行；仅编译可 UI 部分，AI 连续多轮外拨与回传需人工/Mock 完成。
+  compile_backend: deepseek
+  llm_profile: deepseek
+  manual_only: true

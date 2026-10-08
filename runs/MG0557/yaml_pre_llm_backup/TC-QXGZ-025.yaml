@@ -1,0 +1,30 @@
+case_id: TC-QXGZ-025
+title: 人工清洗与AI外呼回传均累计已清洗次数
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+tags:
+- MG0557
+- manual
+- ai_outbound
+meta:
+  manual_only: true
+  source: excel
+  reason: 依赖 AI 外呼第三方回传或需人工造数/Mock，自动集跳过
+  preconditions_text: 场景启用【已清洗次数评分】；准备已清洗次数为0的客资，可分别完成人工清洗提交与AI外呼回传
+  steps_text: '1. 对客资完成一次人工清洗提交，记录次数与命中档位；
+
+    2. 再完成一次AI外呼回传，记录次数与命中档位。'
+  expected_text: 人工清洗提交后次数变为1并命中【已首次清洗】；AI外呼回传后再+1变为2并命中【已二次清洗】；两种清洗方式均计入已清洗次数。
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 占位：ai_outbound 用例，等待人工/造数后执行

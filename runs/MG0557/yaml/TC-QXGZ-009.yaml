@@ -1,0 +1,75 @@
+case_id: TC-QXGZ-009
+title: 所属一级渠道停用或软删除后即使二级启用也不参与新评分
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+- description: 【获客渠道评分】已配置二级渠道D（所属一级为E）；二级D仍为启用；存在命中D的客资
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: wait_visible
+  element: 获客渠道评分
+- action: click
+  element: 获客渠道评分
+- action: assert_visible
+  element: 渠道D配置行
+  description: 前置确认二级渠道D配置行存在
+- action: open
+  url: https://lead.z-niu.com/channel/
+  description: 进入获客渠道管理
+- action: wait_visible
+  element: 获客渠道管理
+- action: click
+  element: 一级渠道E
+- action: click
+  element: 停用
+  description: 将一级渠道E停用（或软删除）
+- action: assert_visible
+  element: 二级渠道D
+  description: 保持二级D启用
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 返回清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: wait_visible
+  element: 获客渠道评分
+- action: click
+  element: 获客渠道评分
+- action: assert_visible
+  element: 渠道D配置行
+  description: 配置行保留
+- action: assert_text_contains
+  element: 渠道D配置行
+  expect: 置灰
+  description: 配置行置灰（需人工确认样式）
+- action: assert_text_contains
+  element: 渠道D配置行
+  expect: '0'
+  description: 客资该维度按0分计（需人工/接口验证）
+tags:
+- compiled
+- needs_fixture
+meta:
+  needs_review: true
+  review_notes: 用例依赖跨模块造数（获客渠道管理停用/软删除一级渠道E、二级渠道D配置、命中D的客资）及重新评分触发，自动集暂不执行；步骤仅编译到可
+    UI 部分，配置行置灰与按0分计需人工/接口验证。
+  compile_backend: deepseek
+  llm_profile: deepseek
+  needs_fixture: true

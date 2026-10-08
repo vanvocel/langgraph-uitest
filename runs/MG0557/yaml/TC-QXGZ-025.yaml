@@ -1,0 +1,66 @@
+case_id: TC-QXGZ-025
+title: 人工清洗与AI外呼回传均累计已清洗次数
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: assert_visible
+  element: 已清洗次数评分
+  description: 前置：场景启用已清洗次数评分
+- action: click
+  element: 人工待清洗
+  description: 进入人工待清洗，对已清洗次数为0的客资完成一次人工清洗提交
+- action: click_if_visible
+  element: 展开筛选
+- action: click_if_visible
+  element: 全部
+- action: click_if_visible
+  element: 重置
+- action: wait_visible
+  element: 查询
+- action: click
+  element: 查询
+- action: click
+  element: 人工清洗提交
+  description: 对客资完成一次人工清洗提交
+- action: assert_column
+  element: 列表表格
+  expect: in:1
+- action: assert_column
+  element: 列表表格
+  expect: contains:已首次清洗
+- action: click
+  element: AI外呼回传
+  description: 再完成一次AI外呼回传（依赖第三方回传，需人工/Mock触发）
+- action: assert_column
+  element: 列表表格
+  expect: in:2
+- action: assert_column
+  element: 列表表格
+  expect: contains:已二次清洗
+tags:
+- compiled
+- manual
+- ai_outbound
+meta:
+  needs_review: true
+  review_notes: 依赖第三方 AI 外呼回传与人工造数，自动集不执行；仅编译可 UI 部分，AI 外呼回传需人工/Mock 触发。
+  compile_backend: deepseek
+  llm_profile: deepseek
+  manual_only: true

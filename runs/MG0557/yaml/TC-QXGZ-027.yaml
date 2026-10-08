@@ -1,0 +1,54 @@
+case_id: TC-QXGZ-027
+title: 场景维度矩阵为7列含获客渠道与AI清洗且不含行为加分
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: wait_visible
+  element: 场景维度矩阵
+- action: assert_headers
+  element: 场景维度矩阵
+  expect: 来源方式评分,获客渠道评分,客资信息完整度评分,平台接通率评分,客资时效性评分,AI清洗评分,已清洗次数评分,!行为加分
+- action: assert_count
+  element: 场景维度矩阵
+  expect: '7'
+- action: click
+  element: 清洗场景一
+- action: click
+  element: 获客渠道评分维度开关
+- action: click
+  element: 保存
+- action: assert_visible
+  element: 获客渠道评分维度开关
+- action: click
+  element: 清洗场景二
+- action: click
+  element: AI清洗评分维度开关
+- action: click
+  element: 保存
+- action: assert_visible
+  element: AI清洗评分维度开关
+tags:
+- compiled
+meta:
+  needs_review: true
+  review_notes: 场景维度矩阵的列名与启用/停用交互依赖实际页面结构，元素语义名（场景维度矩阵、维度列、清洗场景、维度开关、保存）需按真实 DOM 语义名核对；切换启用/停用后保存的断言方式（toast
+    或列状态）需确认。
+  compile_backend: deepseek
+  llm_profile: deepseek

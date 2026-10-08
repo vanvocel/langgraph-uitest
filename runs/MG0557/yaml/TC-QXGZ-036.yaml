@@ -1,0 +1,41 @@
+case_id: TC-QXGZ-036
+title: 无清洗评分规则编辑权限账号仅可查看不可修改
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页面
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: assert_visible
+  element: 获客渠道评分
+- action: assert_visible
+  element: AI清洗评分
+- action: assert_visible
+  element: 已清洗次数评分
+- action: assert_hidden
+  element: 修改
+- action: assert_hidden
+  element: 保存
+tags:
+- compiled
+- needs_fixture
+meta:
+  needs_review: true
+  review_notes: 需造数：准备仅具备查看权限或不具备【清洗评分规则】编辑权限的账号。自动集暂不执行，步骤仅覆盖可 UI 验证部分。
+  compile_backend: deepseek
+  llm_profile: deepseek
+  needs_fixture: true

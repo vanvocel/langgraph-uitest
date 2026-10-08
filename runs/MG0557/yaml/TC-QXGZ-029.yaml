@@ -1,0 +1,45 @@
+case_id: TC-QXGZ-029
+title: 层差校验通过时正常保存并写修改日志
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: click
+  element: 修改
+- action: fill
+  element: 得分输入框
+  value: '1'
+  description: 微调某一维度分值，保持层差校验通过
+- action: click
+  element: 保存
+- action: assert_visible
+  element: 保存成功提示
+- action: click
+  element: 修改日志
+- action: wait_visible
+  element: 修改日志列表
+- action: assert_visible
+  element: 修改日志列表
+tags:
+- compiled
+meta:
+  needs_review: true
+  review_notes: 前置条件依赖当前配置已形成分层结构且校验值大于基准值，需人工确认环境数据；修改日志的具体口径未在 NL 中给出，断言以保存成功与日志存在为准。
+  compile_backend: deepseek
+  llm_profile: deepseek

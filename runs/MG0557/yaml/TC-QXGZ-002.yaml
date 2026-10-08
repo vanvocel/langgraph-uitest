@@ -1,0 +1,55 @@
+case_id: TC-QXGZ-002
+title: 添加渠道选择器候选仅含总部或经销商异地一级下启用二级渠道
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: click
+  element: 修改
+- action: click
+  element: 添加渠道
+- action: wait_visible
+  element: 渠道选择器
+- action: assert_visible
+  element: 一级
+- action: assert_visible
+  element: 二级
+- action: assert_text_contains
+  element: 渠道选择器
+  expect: 总部
+- action: assert_text_contains
+  element: 渠道选择器
+  expect: 经销商异地
+- action: assert_text_not_contains
+  element: 渠道选择器
+  expect: 经销商
+- action: assert_text_not_contains
+  element: 渠道选择器
+  expect: 停用
+- action: assert_text_not_contains
+  element: 渠道选择器
+  expect: 软删除
+tags:
+- compiled
+meta:
+  needs_review: true
+  review_notes: 依赖主数据预置：使用范围含【总部】的启用二级、含【经销商异地】的启用二级、仅含【经销商】的启用二级、停用二级、软删除二级。候选列表的精确断言需人工核对，UI
+    部分仅覆盖到打开添加渠道选择器并核对候选。
+  compile_backend: deepseek
+  llm_profile: deepseek

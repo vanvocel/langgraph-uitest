@@ -1,0 +1,50 @@
+case_id: TC-MG0473-018
+title: 清洗记录多选并集且不选不限
+requirement_id: MG0473
+base_url: https://lead.z-niu.com
+tags:
+- MG0473
+- live
+- excel
+meta:
+  live_notes: 不选不限；列表仅为已产生清洗内容的记录
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/pool/clean
+  description: 打开清洗池
+- action: wait_visible
+  element: 清洗记录
+- action: click
+  element: 清洗记录
+- action: click_if_visible
+  element: 展开筛选
+- action: click_if_visible
+  element: 重置
+- action: wait_visible
+  element: 查询
+- action: multi_select
+  element: 清洗次数
+  value: 首次清洗,三次及以上
+- action: click
+  element: 查询
+- action: wait_visible
+  element: 列表表格
+- action: assert_count
+  element: 列表行
+  expect: gte:1
+- action: click
+  element: 重置
+- action: click
+  element: 查询
+- action: assert_count
+  element: 列表行
+  expect: gte:1

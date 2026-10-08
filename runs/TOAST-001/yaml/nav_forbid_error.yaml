@@ -1,0 +1,19 @@
+case_id: TC_TOAST_NAV_NO_ERROR
+title: 跳转同时禁止错误 toast（toast 会很快消失）
+requirement_id: TOAST-001
+base_url: fixture://
+steps:
+  - action: open
+    url: index.html
+    observe:
+      forbid_toast_levels: []
+  - action: click
+    element: 跳转按钮
+    description: 点击后跳转，成功 toast 一闪而过，不应有 error
+    observe:
+      window_ms: 5000
+      forbid_toast_levels:
+        - error
+      navigation:
+        expect_url_contains: next.html
+        expect_element: 详情标题

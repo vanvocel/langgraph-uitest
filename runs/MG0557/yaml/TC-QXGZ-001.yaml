@@ -1,0 +1,54 @@
+case_id: TC-QXGZ-001
+title: 清洗评分规则页展示获客渠道评分表及添加渠道按钮
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗规则页面
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: wait_visible
+  element: 各维度评分配置
+- action: assert_visible
+  element: 获客渠道评分
+- action: assert_headers
+  element: 列表表格
+  expect: 一级渠道,二级渠道,得分
+- action: assert_column
+  element: 列表表格
+  expect: gte:0
+- action: assert_column
+  element: 列表表格
+  expect: gte:0
+- action: assert_column
+  element: 列表表格
+  expect: gte:0
+- action: assert_column
+  element: 列表表格
+  expect: gte:0
+- action: assert_hidden
+  element: 添加渠道
+- action: click
+  element: 修改
+- action: assert_visible
+  element: 添加渠道
+tags:
+- compiled
+meta:
+  needs_review: true
+  review_notes: NL 中「编辑态可见添加渠道按钮；查看态为纯展示不可编辑」需要进入编辑态（点击修改）才能验证，但 NL 未明确给出进入编辑态的操作步骤，已按默认规则补充点击【修改】进入编辑态；查看态不可编辑的断言方式（按钮隐藏/输入框只读）未明确，需人工确认。
+  compile_backend: deepseek
+  llm_profile: deepseek

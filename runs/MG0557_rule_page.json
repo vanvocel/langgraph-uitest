@@ -1,0 +1,76 @@
+{
+  "url": "https://lead.z-niu.com/rule/clean/",
+  "tabs": [
+    {
+      "text": "总配置",
+      "href": "",
+      "cls": "el-tabs__item is-top is-active"
+    },
+    {
+      "text": "入池规则",
+      "href": "",
+      "cls": "el-tabs__item is-top"
+    },
+    {
+      "text": "AI外呼规则",
+      "href": "",
+      "cls": "el-tabs__item is-top"
+    },
+    {
+      "text": "人工清洗规则",
+      "href": "",
+      "cls": "el-tabs__item is-top"
+    },
+    {
+      "text": "客服必填字段",
+      "href": "",
+      "cls": "el-tabs__item is-top"
+    },
+    {
+      "text": "清洗评分规则",
+      "href": "",
+      "cls": "el-tabs__item is-top"
+    },
+    {
+      "text": "客服坐席",
+      "href": "",
+      "cls": "el-tabs__item is-top"
+    },
+    {
+      "text": "客服排班管理",
+      "href": "",
+      "cls": "el-tabs__item is-top"
+    },
+    {
+      "text": "任务派发策略配置",
+      "href": "",
+      "cls": "el-tabs__item is-top"
+    },
+    {
+      "text": "中间号资源管理",
+      "href": "",
+      "cls": "el-tabs__item is-top"
+    },
+    {
+      "text": "操作日志",
+      "href": "",
+      "cls": "el-tabs__item is-top"
+    },
+    {
+      "text": "版本记录",
+      "href": "",
+      "cls": "el-tabs__item is-top"
+    },
+    {
+      "text": "任务派发策略",
+      "href": "",
+      "cls": "el-tabs__item is-top is-active"
+    },
+    {
+      "text": "派发记录",
+      "href": "",
+      "cls": "el-tabs__item is-top"
+    }
+  ],
+  "body": "功能\n线索规则\n清洗规则\n99+\n录视频\n下载中心\n非凡\n马非凡\n超级管理员\n报名与线索\n线索导入\n报名记录\n清洗池\n总线索池\n推送管理\n拨号盘\n线索规则\n平台接入\n合并规则\n清洗规则\n组织关联\n账号管理\n分配规则管理\n分配策略配置\n分配路由规则\n门店接收人\n分配匹配日志\n获客渠道\n获客渠道识别规则\n广告主管理\n收费管理\n经销商分组管理\n收费及返费规则\nCRM下发策略\n费用流水\n资金管理\n费用策略设置\n订单管理\n订单接入\n核销记录\n数据分析\n渠道来源分析\n清洗下发转化分析\n系统设置\n来源平台\n线索标签\n客资费用预警\n客资消息推送\n收起\n总配置\n入池规则\nAI外呼规则\n人工清洗规则\n客服必填字段\n清洗评分规则\n客服坐席\n客服排班管理\n任务派发策略配置\n中间号资源管理\n操作日志\n版本记录\n清洗池总配置\n\n维护清洗池总开关、清洗记录同步和通用领取限制。\n\n保存\n清洗池总开关\n客服上下班打卡开关\n人工待清洗量看板\nAI助手\n你好👋\n我是AI助手，我可以为你查找功能入口、功能介绍、搜索客户、提供经营建议、也可以为你生成营销创意文案。\n你可以试着问我：\n换一换\n查找今日新建的客户\n我的待办\n门店今日收益多少\n有什么问题？\n\n请求失败\n\n请求失败"
+}

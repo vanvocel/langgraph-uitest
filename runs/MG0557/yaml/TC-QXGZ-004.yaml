@@ -1,0 +1,87 @@
+case_id: TC-QXGZ-004
+title: 主数据新增二级渠道不自动进入获客渠道评分配置表
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+- description: 账号可编辑【清洗评分规则】与【获客渠道管理】
+- description: 当前【获客渠道评分】配置表已记录行数
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: assert_visible
+  element: 获客渠道评分
+- action: assert_count
+  element: 获客渠道评分配置表
+  expect: 记录当前行数
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 进入获客渠道管理（跨模块造数）
+- action: wait_visible
+  element: 获客渠道管理
+- action: click
+  element: 获客渠道管理
+- action: click
+  element: 添加渠道
+- action: fill
+  element: 渠道名称
+  value: 自动化二级渠道
+- action: select
+  element: 渠道层级
+  value: 二级渠道
+- action: select
+  element: 使用范围
+  value: 总部
+- action: select
+  element: 状态
+  value: 启用
+- action: click
+  element: 保存
+- action: assert_visible
+  element: 自动化二级渠道
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 返回清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: assert_visible
+  element: 获客渠道评分
+- action: assert_count
+  element: 获客渠道评分配置表
+  expect: 行数与前置记录一致
+- action: assert_text_not_contains
+  element: 获客渠道评分配置表
+  expect: 自动化二级渠道
+- action: click
+  element: 添加渠道
+- action: assert_visible
+  element: 添加渠道
+- action: assert_text_contains
+  element: 添加渠道候选列表
+  expect: 自动化二级渠道
+- action: click
+  element: 弹窗关闭
+tags:
+- compiled
+- needs_fixture
+meta:
+  needs_review: true
+  review_notes: 用例依赖跨模块造数（在【获客渠道管理】新增二级渠道）与前置行数记录，自动集暂不执行；步骤仅编译到可 UI 部分，需人工/夹具准备数据后执行。
+  compile_backend: deepseek
+  llm_profile: deepseek
+  needs_fixture: true

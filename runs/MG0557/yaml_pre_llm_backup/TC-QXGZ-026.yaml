@@ -1,0 +1,31 @@
+case_id: TC-QXGZ-026
+title: 无效线索重新激活后已清洗次数不清零
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+tags:
+- MG0557
+- needs_fixture
+meta:
+  needs_fixture: true
+  source: excel
+  reason: 需造数/跨模块/故障注入/只读账号等前置，暂不自动执行
+  preconditions_text: 场景启用【已清洗次数评分】；准备已清洗次数≥1且已标记无效的线索，支持重新激活
+  steps_text: '1. 记录无效前已清洗次数与命中档位；
+
+    2. 将该无效线索重新激活；
+
+    3. 再次触发清洗评分并核对次数与档位。'
+  expected_text: 重新激活后已清洗次数保持原值不清零；【已清洗次数评分】仍按原次数匹配对应档位。
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 占位：needs_fixture 用例，等待人工/造数后执行

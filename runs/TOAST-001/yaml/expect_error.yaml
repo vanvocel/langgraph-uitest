@@ -1,0 +1,18 @@
+case_id: TC_TOAST_ERROR_EXPECT
+title: 期望错误 toast
+requirement_id: TOAST-001
+base_url: fixture://
+steps:
+  - action: open
+    url: index.html
+    observe:
+      forbid_toast_levels: []
+  - action: click
+    element: 保存失败按钮
+    description: 点击保存触发校验错误
+    observe:
+      window_ms: 3000
+      forbid_toast_levels: []
+      toasts:
+        - expect: error
+          contains: 名称不能为空

@@ -1,0 +1,38 @@
+case_id: TC-MG0473-022
+title: AI外呼待清洗不提供清洗次数筛选
+requirement_id: MG0473
+base_url: https://lead.z-niu.com
+tags:
+- MG0473
+- live
+- excel
+meta:
+  live_notes: 现网页签名 AI 外呼待清洗；无清洗次数筛选
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/pool/clean
+  description: 打开清洗池
+- action: click
+  element: AI外呼待清洗
+- action: click_if_visible
+  element: 展开筛选
+- action: wait_visible
+  element: 查询
+- action: assert_text_not_contains
+  element: 页面
+  expect: 清洗次数
+- action: wait_visible
+  element: 任务状态
+- action: click
+  element: 查询
+- action: wait_visible
+  element: 列表表格

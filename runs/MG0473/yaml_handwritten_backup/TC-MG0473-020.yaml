@@ -1,0 +1,36 @@
+case_id: TC-MG0473-020
+title: 清洗记录列表列名与筛选名区分
+requirement_id: MG0473
+base_url: https://lead.z-niu.com
+tags:
+- MG0473
+- live
+- excel
+meta:
+  live_notes: 现网列表无清洗次数列，筛选仍叫清洗次数
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/pool/clean
+  description: 打开清洗池
+- action: wait_visible
+  element: 清洗记录
+- action: click
+  element: 清洗记录
+- action: click_if_visible
+  element: 展开筛选
+- action: click_if_visible
+  element: 重置
+- action: wait_visible
+  element: 查询
+- action: assert_headers
+  element: 列表表格
+  expect: 客户摘要,清洗类型,清洗结果,!清洗状态

@@ -1,0 +1,31 @@
+case_id: TC-QXGZ-012
+title: 获客渠道主数据加载失败时禁止保存清洗评分规则
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+tags:
+- MG0557
+- needs_fixture
+meta:
+  needs_fixture: true
+  source: excel
+  reason: 需造数/跨模块/故障注入/只读账号等前置，暂不自动执行
+  preconditions_text: 账号可编辑【清洗评分规则】；可模拟获客渠道主数据接口/加载失败
+  steps_text: '1. 进入编辑态并修改任意评分配置；
+
+    2. 在主数据加载失败状态下点击【保存】；
+
+    3. 核对页面提示与配置是否落库。'
+  expected_text: 保存被禁止并给出失败提示；配置值不落库；不产生成功保存的操作日志。
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 占位：needs_fixture 用例，等待人工/造数后执行

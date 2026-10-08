@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Demo Login</title>
+  <style>
+    body { font-family: sans-serif; max-width: 360px; margin: 40px auto; }
+    .error { color: #b00020; display: none; }
+    .ok { color: #0a7; display: none; }
+    label { display: block; margin-top: 12px; }
+    input, button { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; }
+  </style>
+</head>
+<body>
+  <h1>Demo Login</h1>
+  <p id="err" class="error" role="alert">用户名或密码错误</p>
+  <form id="loginForm">
+    <label>用户名
+      <input id="username" name="username" type="text" />
+    </label>
+    <label>密码
+      <input id="password" name="password" type="password" />
+    </label>
+    <button id="loginBtn" type="submit">登录</button>
+  </form>
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var u = document.getElementById("username").value;
+      var p = document.getElementById("password").value;
+      if (u === "demo" && p === "Pass@123") {
+        window.location.href = "secure.html";
+      } else {
+        document.getElementById("err").style.display = "block";
+      }
+    });
+  </script>
+</body>
+</html>

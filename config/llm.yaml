@@ -1,0 +1,30 @@
+# LLM profiles. Secrets stay in .env (api_key_env). Do not put keys here.
+
+# stub = 不调远程（仅单测 force_backend=stub）
+# auto = 有 Key 走 LLM，否则 stub（不推荐用于正式编译）
+# llm  = 必须有 Key；正式 Excel/NL→YAML 一律走大模型
+backend: llm
+
+active: deepseek
+
+profiles:
+  deepseek:
+    provider: openai_compat
+    model: deepseek-chat
+    base_url: https://api.deepseek.com/v1
+    api_key_env: DEEPSEEK_API_KEY
+    temperature: 0
+
+  zhipu:
+    provider: openai_compat
+    model: glm-4
+    base_url: https://open.bigmodel.cn/api/coding/paas/v4
+    api_key_env: ZHIPUAI_API_KEY
+    temperature: 0
+
+  gpt:
+    provider: openai_compat
+    model: gpt-4o
+    base_url: https://api.openai.com/v1
+    api_key_env: OPENAI_API_KEY
+    temperature: 0

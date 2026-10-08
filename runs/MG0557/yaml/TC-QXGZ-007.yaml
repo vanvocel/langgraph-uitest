@@ -1,0 +1,39 @@
+case_id: TC-QXGZ-007
+title: 未添加至配置的二级渠道命中时【获客渠道评分】按0分计
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: assert_visible
+  element: 获客渠道评分
+  description: 确认场景已启用【获客渠道评分】维度
+- action: assert_text_contains
+  element: 页面
+  expect: 获客渠道评分
+  description: 核对已配置分层评分规则且场景启用【获客渠道评分】
+tags:
+- compiled
+- needs_fixture
+meta:
+  needs_review: true
+  review_notes: 用例依赖造数/跨模块/故障注入/只读账号等前置（线索A命中未添加的二级渠道、线索B命中已配置分值900的二级渠道，且其余维度分值可控为相同），自动集暂不执行；步骤仅编译到可
+    UI 部分，评分计算触发与得分核对需人工或 fixture 支持。
+  compile_backend: deepseek
+  llm_profile: deepseek
+  needs_fixture: true

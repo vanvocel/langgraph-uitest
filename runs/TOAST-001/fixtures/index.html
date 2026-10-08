@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Toast Lab</title>
+</head>
+<body>
+  <button id="btn-success" type="button">保存成功</button>
+  <button id="btn-error" type="button">保存失败</button>
+  <button id="btn-go" type="button">跳转且成功</button>
+  <button id="btn-go-error" type="button">跳转且报错</button>
+  <script>
+    function showToast(level, text, lifeMs) {
+      const el = document.createElement("div");
+      el.className = "el-message el-message--" + level;
+      el.innerHTML = '<p class="el-message__content">' + text + "</p>";
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), lifeMs);
+    }
+    document.getElementById("btn-success").onclick = () => {
+      showToast("success", "保存成功", 250);
+    };
+    document.getElementById("btn-error").onclick = () => {
+      showToast("error", "名称不能为空", 250);
+    };
+    document.getElementById("btn-go").onclick = () => {
+      showToast("success", "保存成功", 200);
+      setTimeout(() => { location.href = "next.html"; }, 80);
+    };
+    document.getElementById("btn-go-error").onclick = () => {
+      showToast("error", "系统异常", 200);
+      setTimeout(() => { location.href = "next.html"; }, 80);
+    };
+  </script>
+</body>
+</html>

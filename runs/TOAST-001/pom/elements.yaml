@@ -1,0 +1,17 @@
+page: ToastLab
+elements:
+  保存成功按钮:
+    by: css
+    value: "#btn-success"
+  保存失败按钮:
+    by: css
+    value: "#btn-error"
+  跳转按钮:
+    by: css
+    value: "#btn-go"
+  跳转报错按钮:
+    by: css
+    value: "#btn-go-error"
+  详情标题:
+    by: css
+    value: "#title"

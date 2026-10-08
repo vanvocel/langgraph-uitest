@@ -1,0 +1,58 @@
+case_id: TC-QXGZ-023
+title: 已清洗0次命中【未清洗】档而非不得分
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: wait_visible
+  element: 已清洗次数评分
+- action: assert_visible
+  element: 已清洗次数评分
+- action: assert_text_contains
+  element: 未清洗
+  expect: '10000'
+- action: click
+  element: 修改
+- action: assert_visible
+  element: 得分输入框
+- action: assert_value
+  element: 得分输入框
+  expect: '10000'
+- action: click
+  element: 取消
+- action: wait_visible
+  element: 查询
+- action: click
+  element: 查询
+- action: assert_text_contains
+  element: 页面
+  expect: 未清洗
+- action: assert_text_not_contains
+  element: 页面
+  expect: 0次不匹配任何档位
+tags:
+- compiled
+- needs_fixture
+meta:
+  needs_review: true
+  review_notes: 用例依赖造数：需准备累计已清洗次数为0的客资，并确保场景启用【已清洗次数评分】且【未清洗】档分为10000。自动集暂不执行，仅编译可
+    UI 部分。
+  compile_backend: deepseek
+  llm_profile: deepseek
+  needs_fixture: true

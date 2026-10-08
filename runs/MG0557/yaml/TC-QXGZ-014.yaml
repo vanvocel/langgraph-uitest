@@ -1,0 +1,46 @@
+case_id: TC-QXGZ-014
+title: AI清洗评分仅展示一档最近一次为AI外呼且默认6000
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: wait_visible
+  element: AI清洗评分
+- action: assert_headers
+  element: 列表表格
+  expect: 清洗方式,得分
+- action: assert_text_contains
+  element: AI清洗评分
+  expect: 最近一次为 AI 外呼
+- action: assert_value
+  element: 得分输入框
+  expect: '6000'
+- action: assert_text_not_contains
+  element: AI清洗评分
+  expect: 未清洗
+- action: assert_text_not_contains
+  element: AI清洗评分
+  expect: 人工清洗
+tags:
+- compiled
+meta:
+  needs_review: true
+  review_notes: 用例为只读核对类，涉及表格列名、档位行与默认分值断言；具体元素语义名（AI清洗评分表、清洗方式列、得分列、档位行）需按实际页面确认。
+  compile_backend: deepseek
+  llm_profile: deepseek

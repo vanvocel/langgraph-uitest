@@ -1,0 +1,8 @@
+page: DiscoverSmoke
+url: fixture://page.html
+elements:
+  查询:
+    by: role
+    value: button
+    name: 查询
+    exact: true

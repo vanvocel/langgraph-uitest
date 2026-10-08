@@ -1,0 +1,41 @@
+case_id: TC-MG0473-001
+title: 人工待清洗-清洗次数下拉五项且三次与三次及以上独立
+requirement_id: MG0473
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/pool/clean
+  description: 打开清洗池
+- action: wait_visible
+  element: 人工待清洗
+- action: click
+  element: 人工待清洗
+- action: click_if_visible
+  element: 展开筛选
+- action: click_if_visible
+  element: 全部
+- action: click_if_visible
+  element: 重置
+- action: wait_visible
+  element: 查询
+- action: assert_options
+  element: 清洗次数
+  expect: 未清洗,首次清洗,二次清洗,三次清洗,三次及以上
+tags:
+- compiled
+- MG0473
+- live
+meta:
+  needs_review: false
+  compile_backend: deepseek
+  llm_profile: deepseek

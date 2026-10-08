@@ -1,0 +1,60 @@
+case_id: TC-QXGZ-006
+title: 移除已配置渠道保存后配置表不再展示该行
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: wait_visible
+  element: 获客渠道评分
+- action: click
+  element: 修改
+  description: 进入编辑态
+- action: click
+  element: 移除
+  description: 对目标渠道点击移除
+- action: click
+  element: 保存
+- action: assert_text_contains
+  element: 页面
+  expect: 保存成功
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 刷新页面
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: wait_visible
+  element: 获客渠道评分
+- action: assert_hidden
+  element: 目标渠道行
+  description: 配置表中不再展示被移除的渠道行
+- action: click
+  element: 添加渠道
+- action: assert_visible
+  element: 目标渠道选项
+  description: 再次打开添加渠道时该渠道可重新勾选
+tags:
+- compiled
+meta:
+  needs_review: true
+  review_notes: 前置依赖【获客渠道评分】中已配置至少 1 条二级渠道，需人工造数或已有数据；移除后再次打开【添加渠道】验证该渠道可重新勾选，涉及具体渠道名称未在
+    NL 中给出，需按实际数据替换。
+  compile_backend: deepseek
+  llm_profile: deepseek

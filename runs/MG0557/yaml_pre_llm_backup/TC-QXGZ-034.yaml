@@ -1,0 +1,31 @@
+case_id: TC-QXGZ-034
+title: 客资获客渠道变化后【获客渠道评分】实时刷新
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+tags:
+- MG0557
+- needs_fixture
+meta:
+  needs_fixture: true
+  source: excel
+  reason: 需造数/跨模块/故障注入/只读账号等前置，暂不自动执行
+  preconditions_text: 场景启用【获客渠道评分】；渠道H、I均已配置且分值不同；准备客资当前命中H
+  steps_text: '1. 记录客资当前【获客渠道评分】得分；
+
+    2. 将客资渠道识别结果变更为I；
+
+    3. 核对维度得分是否按I重新匹配。'
+  expected_text: 得分按新二级渠道I实时刷新为对应配置分；历史评分结果不回溯。
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 占位：needs_fixture 用例，等待人工/造数后执行

@@ -1,0 +1,41 @@
+case_id: TC-QXGZ-022
+title: 【已清洗次数评分】分值支持0-99999自定义且不能为空
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+tags:
+- MG0557
+- ui
+meta:
+  source: excel
+  live_url: https://lead.z-niu.com/rule/clean/
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗规则
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+  description: 进入清洗评分规则页签
+- action: wait_visible
+  element: 页面
+- action: click
+  element: 修改
+- action: wait_visible
+  element: 已清洗次数评分表
+- action: assert_text_contains
+  element: 页面
+  expect: 已清洗次数评分
+- action: assert_visible
+  element: 保存
+- action: click_if_visible
+  element: 取消

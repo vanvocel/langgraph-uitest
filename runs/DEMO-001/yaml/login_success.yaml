@@ -1,0 +1,21 @@
+case_id: TC_DEMO_AFTER_LOGIN_001
+title: 已登录访问业务主站
+requirement_id: DEMO-001
+base_url: https://main.z-niu.com/
+tags:
+  - phase2
+  - demo
+preconditions:
+  - auth: logged_in
+    account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 10000
+steps:
+  - action: open
+    url: https://main.z-niu.com/
+    description: 打开业务主站
+  - action: assert_url_contains
+    expect: main.z-niu.com
+    description: 断言已在业务主站（登录由 bootstrap 完成）

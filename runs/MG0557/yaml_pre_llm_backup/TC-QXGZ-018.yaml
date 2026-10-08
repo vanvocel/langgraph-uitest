@@ -1,0 +1,29 @@
+case_id: TC-QXGZ-018
+title: 人工清洗提交后【AI清洗评分】不命中按0分计
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+tags:
+- MG0557
+- needs_fixture
+meta:
+  needs_fixture: true
+  source: excel
+  reason: 需造数/跨模块/故障注入/只读账号等前置，暂不自动执行
+  preconditions_text: 场景启用【AI清洗评分】；准备客资完成人工清洗提交（最近清洗方式为人工清洗）
+  steps_text: '1. 对客资完成人工清洗提交；
+
+    2. 查看该客资【AI清洗评分】维度得分。'
+  expected_text: 【AI清洗评分】不命中，维度得分为0；不保留此前若存在的AI阶段档位。
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 占位：needs_fixture 用例，等待人工/造数后执行

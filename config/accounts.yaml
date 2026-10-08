@@ -1,0 +1,14 @@
+# Account references. Secrets come from environment variables / .env.
+
+accounts:
+  default_tester:
+    description: 墨斗默认测试账号（输入手机号后可能出现组织选择）
+    username_env: TEST_USERNAME
+    password_env: TEST_PASSWORD
+    org_select:
+      # none  = 不选组织
+      # fixed = 必须出现组织并选到 value；不出现则失败
+      # auto  = 短等组织下拉；出现则选 value，不出现则跳过
+      mode: auto
+      value: "墨斗科技 / 总部"
+      wait_ms: 5000

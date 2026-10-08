@@ -1,0 +1,50 @@
+case_id: TC-QXGZ-030
+title: 层差校验不通过默认阻断并提供返回调整与风险保存入口
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: click
+  element: 修改
+  description: 进入编辑态
+- action: fill
+  element: 高层级档位分差
+  value: '0'
+  description: 将高层级档位分差调至不满足层差要求（不大于基准值）
+- action: click
+  element: 保存
+- action: wait_visible
+  element: 层差校验弹窗
+- action: assert_visible
+  element: 层差校验弹窗
+- action: assert_text_contains
+  element: 层差校验弹窗
+  expect: 校验值
+- action: assert_text_contains
+  element: 层差校验弹窗
+  expect: 基准值
+- action: assert_visible
+  element: 返回调整
+- action: assert_visible
+  element: 已知风险仍保存
+tags:
+- compiled
+meta:
+  needs_review: true
+  review_notes: 前置需构造校验值不大于基准值的分层配置，属于人工造数/特定数据依赖；弹窗文案与计算明细的具体文本未在 NL 中给出，断言使用语义化描述，需人工核对实际文案。
+  compile_backend: deepseek
+  llm_profile: deepseek

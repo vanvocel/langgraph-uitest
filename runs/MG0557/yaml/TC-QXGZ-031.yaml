@@ -1,0 +1,51 @@
+case_id: TC-QXGZ-031
+title: 层差不通过点击返回调整不改变配置且不写操作日志
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: wait_visible
+  element: 层差不通过提示
+- action: click
+  element: 返回调整
+  description: 在层差不通过提示中点击返回调整
+- action: assert_hidden
+  element: 层差不通过提示
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 刷新页面核对配置值
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: assert_visible
+  element: 配置值
+  description: 核对配置值保持保存前已落库状态不变
+- action: click
+  element: 修改日志
+- action: assert_visible
+  element: 修改日志列表
+  description: 查看修改日志是否新增记录，预期不产生新的操作日志
+tags:
+- compiled
+meta:
+  needs_review: true
+  review_notes: 前置依赖已触发层差校验不通过弹窗，需人工造数或故障注入构造层差不通过场景；步骤2/3的配置值与日志时间需人工记录比对，UI 自动化仅能覆盖点击返回调整/关闭提示与刷新页面。
+  compile_backend: deepseek
+  llm_profile: deepseek

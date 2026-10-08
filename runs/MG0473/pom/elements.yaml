@@ -1,0 +1,107 @@
+# Regenerated 2026-10-07 via discover --force --llm deepseek.
+# Filter/sidebar locators kept from validated live xpaths (LLM text/placeholder hit sidebar).
+page: CleanPoolPage
+url: https://lead.z-niu.com/pool/clean
+elements:
+  人工待清洗:
+    by: role
+    value: tab
+    name: 人工待清洗
+    exact: true
+  AI外呼待清洗:
+    by: role
+    value: tab
+    name: AI 外呼待清洗
+    exact: true
+  清洗记录:
+    by: role
+    value: tab
+    name: 清洗记录
+    exact: true
+  已清洗客资:
+    by: role
+    value: tab
+    name: 已清洗客资
+    exact: true
+  展开筛选:
+    by: role
+    value: button
+    name: 展开筛选
+    exact: true
+  收起筛选:
+    by: role
+    value: button
+    name: 收起筛选
+    exact: true
+  清洗次数:
+    by: xpath
+    value: "//*[normalize-space()='清洗次数' and not(ancestor::*[contains(@class,'el-table')]) and not(ancestor::aside) and not(ancestor::*[contains(@class,'el-menu')])]/following::*[contains(@class,'el-select__wrapper') or contains(@class,'el-select')][1]"
+  来源:
+    by: xpath
+    value: "//*[normalize-space()='来源' and not(ancestor::*[contains(@class,'el-table')]) and not(ancestor::aside) and not(ancestor::*[contains(@class,'el-menu')])]/following::*[contains(@class,'el-select__wrapper') or contains(@class,'el-select')][1]"
+  获客渠道:
+    by: xpath
+    value: "//*[normalize-space()='获客渠道' and not(ancestor::*[contains(@class,'el-table')]) and not(ancestor::aside) and not(ancestor::*[contains(@class,'el-menu')])]/following::*[contains(@class,'el-select__wrapper') or contains(@class,'el-select')][1]"
+  来源平台:
+    by: xpath
+    value: "//*[normalize-space()='来源平台' and not(ancestor::*[contains(@class,'el-table')]) and not(ancestor::aside) and not(ancestor::*[contains(@class,'el-menu')])]/following::*[contains(@class,'el-select__wrapper') or contains(@class,'el-select')][1]"
+  当前范围清洗次数:
+    by: xpath
+    value: "//*[normalize-space()='当前范围清洗次数' and not(ancestor::*[contains(@class,'el-table')])]/following::*[contains(@class,'el-select__wrapper') or contains(@class,'el-select')][1]"
+  任务状态:
+    by: xpath
+    value: "//*[normalize-space()='任务状态' and not(ancestor::*[contains(@class,'el-table')])]/following::*[contains(@class,'el-select__wrapper') or contains(@class,'el-select')][1]"
+  查询:
+    by: role
+    value: button
+    name: 查询
+    exact: true
+  重置:
+    by: role
+    value: button
+    name: 重置
+    exact: true
+  导出:
+    by: role
+    value: button
+    name: 导出
+    exact: true
+  下载中心:
+    by: text
+    value: 下载中心
+    exact: true
+  全部:
+    by: xpath
+    value: "//*[contains(@class,'el-check-tag') and contains(normalize-space(),'全部')][1]"
+  列表表格:
+    by: css
+    value: ".el-table"
+  列表行:
+    by: css
+    value: ".el-table__body tbody tr:not(.el-table__empty-row)"
+  页面:
+    by: css
+    value: body
+  批量领取:
+    by: text
+    value: 批量领取
+    exact: true
+  弹窗:
+    by: css
+    value: ".el-dialog:visible"
+  弹窗_继续清洗:
+    by: xpath
+    value: "//div[contains(@class,'el-dialog')][.//*[normalize-space()='批量领取']]//*[normalize-space()='继续清洗']"
+  弹窗关闭:
+    by: css
+    value: ".el-dialog:visible .el-dialog__headerbtn"
+  清洗规则分组:
+    by: xpath
+    value: "//div[contains(@class,'md-sidebar__group-title') and contains(normalize-space(),'线索规则')]"
+  清洗规则:
+    by: xpath
+    value: "//span[contains(@class,'md-sidebar__menu-item-label') and normalize-space()='清洗规则']"
+  线索 ID:
+    by: text
+    value: 线索 ID
+    exact: true

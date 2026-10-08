@@ -1,0 +1,53 @@
+case_id: TC-QXGZ-032
+title: 已知风险仍保存经二次确认后落库并标记层差风险日志
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: click
+  element: 修改
+- action: click
+  element: 保存
+- action: wait_visible
+  element: 已知风险仍保存
+- action: click
+  element: 已知风险仍保存
+- action: wait_visible
+  element: 二次确认
+- action: click
+  element: 确认
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 刷新页面核对配置
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: assert_visible
+  element: 修改日志
+- action: assert_text_contains
+  element: 修改日志
+  expect: 已知层差风险保存
+tags:
+- compiled
+meta:
+  needs_review: true
+  review_notes: 前置依赖「已触发层差校验不通过弹窗」，该弹窗需通过特定配置触发，具体触发数据未在用例中给出，需人工造数或补充前置步骤。
+  compile_backend: deepseek
+  llm_profile: deepseek

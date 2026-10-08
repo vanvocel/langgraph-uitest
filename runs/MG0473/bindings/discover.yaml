@@ -1,0 +1,188 @@
+req_id: MG0473
+needed:
+- 人工待清洗
+- 展开筛选
+- 全部
+- 重置
+- 查询
+- 清洗次数
+- 列表表格
+- 列表行
+- 来源
+- 收起筛选
+- 清洗规则分组
+- 清洗规则
+- 页面
+- 清洗记录
+- 线索 ID
+- 来源平台
+- AI外呼待清洗
+- 任务状态
+- 已清洗客资
+- 当前范围清洗次数
+- 批量领取
+- 弹窗
+- 弹窗关闭
+- 导出
+- 下载中心
+bound:
+  人工待清洗:
+    by: role
+    value: tab
+    name: 人工待清洗
+    exact: true
+    confidence: 0.95
+  展开筛选:
+    by: role
+    value: button
+    name: 展开筛选
+    exact: true
+    confidence: 0.95
+  全部:
+    by: role
+    value: button
+    name: 全部
+    exact: true
+    confidence: 0.95
+  重置:
+    by: role
+    value: button
+    name: 重置
+    exact: true
+    confidence: 0.95
+  查询:
+    by: role
+    value: button
+    name: 查询
+    exact: true
+    confidence: 0.95
+  清洗次数:
+    by: xpath
+    value: //*[normalize-space()='清洗次数' and not(ancestor::*[contains(@class,'el-table')])
+      and not(ancestor::aside) and not(ancestor::*[contains(@class,'el-menu')])]/following::*[contains(@class,'el-select__wrapper')
+      or contains(@class,'el-select') or contains(@class,'el-input') or self::input
+      or self::textarea][1]
+    name: null
+    exact: null
+    confidence: 0.95
+  列表表格:
+    by: css
+    value: .el-table
+    name: null
+    exact: null
+    confidence: 0.95
+  列表行:
+    by: css
+    value: .el-table__body tbody tr:not(.el-table__empty-row)
+    name: null
+    exact: null
+    confidence: 0.72
+  来源:
+    by: placeholder
+    value: 来源
+    name: null
+    exact: null
+    confidence: 0.95
+  收起筛选:
+    by: role
+    value: button
+    name: 收起筛选
+    exact: true
+    confidence: 0.95
+  清洗规则:
+    by: text
+    value: 清洗规则
+    name: null
+    exact: true
+    confidence: 0.95
+  页面:
+    by: css
+    value: body
+    name: null
+    exact: null
+    confidence: 0.95
+  清洗记录:
+    by: role
+    value: tab
+    name: 清洗记录
+    exact: true
+    confidence: 0.95
+  线索 ID:
+    by: text
+    value: 线索 ID
+    name: null
+    exact: true
+    confidence: 0.95
+  来源平台:
+    by: text
+    value: 来源平台
+    name: null
+    exact: true
+    confidence: 0.95
+  已清洗客资:
+    by: role
+    value: tab
+    name: 已清洗客资
+    exact: true
+    confidence: 0.95
+  批量领取:
+    by: text
+    value: 批量领取
+    name: null
+    exact: true
+    confidence: 0.95
+  弹窗:
+    by: css
+    value: .el-dialog:visible
+    name: null
+    exact: null
+    confidence: 0.95
+  弹窗关闭:
+    by: css
+    value: .el-dialog:visible .el-dialog__headerbtn
+    name: null
+    exact: null
+    confidence: 0.95
+  导出:
+    by: role
+    value: button
+    name: 导出
+    exact: true
+    confidence: 0.95
+  下载中心:
+    by: text
+    value: 下载中心
+    name: null
+    exact: true
+    confidence: 0.72
+  清洗规则分组:
+    by: text
+    value: 清洗规则
+    name: null
+    exact: true
+    confidence: 0.95
+  AI外呼待清洗:
+    by: role
+    value: tab
+    name: AI 外呼待清洗
+    exact: true
+    confidence: 0.95
+  任务状态:
+    by: css
+    value: .el-select__wrapper.is-filterable
+    name: null
+    exact: null
+    confidence: 0.72
+  当前范围清洗次数:
+    by: css
+    value: .el-table__header th:has-text("清洗次数")
+    name: null
+    exact: null
+    confidence: 0.95
+kept: []
+unbound: []
+blocked: false
+backend: deepseek
+llm_profile: deepseek
+llm_error: null
+pom: D:\Project\AI\LangGraph-uitest\runs\MG0473\pom\elements.yaml

@@ -1,0 +1,71 @@
+# Secrets
+.env
+.env.local
+*.pem
+
+# Auth storage (Playwright storage_state)
+.auth/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+.envrc
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Allure
+**/allure-results/
+**/allure-report/
+allure-results/
+allure-report/
+
+# Playwright
+playwright-report/
+test-results/
+.playwright/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs & local run artifacts (keep directory structure via .gitkeep)
+runs/**/logs/*
+!runs/**/logs/.gitkeep
+runs/**/allure-results/*
+runs/**/*.compiled.yaml
+runs/**/summary.json
+*.log
+
+# Generated Excel backfill & screenshots
+runs/**/excel_screenshots/
+runs/**/*_结果回填.xlsx
+runs/**/excel_backfill_summary.json
+runs/**/backfill_summary.json
+runs/**/_fail_summary.txt
+runs/**/*_probe*.png
+runs/**/*_probe*.json
+runs/**/edit_probe*.png
+runs/**/edit_probe*.json
+runs/**/score_*.png
+runs/**/score_*.json
+runs/**/picker.png
+runs/**/tabs.json
+
+# Generated single-file Allure HTML
+runs/**/allure-report.html
+

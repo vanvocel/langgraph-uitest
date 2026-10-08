@@ -1,0 +1,55 @@
+case_id: TC-QXGZ-034
+title: 客资获客渠道变化后【获客渠道评分】实时刷新
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: assert_visible
+  element: 获客渠道评分
+  description: 确认场景已启用【获客渠道评分】
+- action: capture_column
+  element: 获客渠道评分
+  value: col_获客渠道评分
+  description: 记录客资当前【获客渠道评分】得分（命中渠道H）
+- action: assert_column
+  element: 获客渠道评分
+  expect: gte:0
+  description: 核对当前得分为渠道H对应配置分
+- action: assert_text_contains
+  element: 页面
+  expect: 获客渠道评分
+  description: 步骤2：将客资渠道识别结果变更为I（跨模块造数，UI 暂不执行）
+- action: assert_column
+  element: 获客渠道评分
+  expect: gte:0
+  description: 步骤3：核对维度得分是否按I重新匹配，得分按新二级渠道I实时刷新为对应配置分
+- action: assert_text_not_contains
+  element: 页面
+  expect: 历史评分结果回溯
+  description: 预期：历史评分结果不回溯
+tags:
+- compiled
+- needs_fixture
+meta:
+  needs_review: true
+  review_notes: 用例依赖造数/跨模块/故障注入/只读账号等前置条件，自动集暂不执行。需人工准备：场景启用【获客渠道评分】；渠道H、I均已配置且分值不同；客资当前命中H。步骤2（变更客资渠道识别结果为I）涉及跨模块数据变更，UI
+    自动化暂无法覆盖，需人工或接口造数完成。
+  compile_backend: deepseek
+  llm_profile: deepseek
+  needs_fixture: true

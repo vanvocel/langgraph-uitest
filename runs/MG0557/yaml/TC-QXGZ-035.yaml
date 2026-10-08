@@ -1,0 +1,64 @@
+case_id: TC-QXGZ-035
+title: 被评分引用的二级渠道允许在获客渠道管理中删除
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+- description: 【获客渠道评分】已引用二级渠道J
+- description: 账号可操作【获客渠道管理】删除二级渠道
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页面
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: open
+  url: https://lead.z-niu.com/channel/acquire/
+  description: 进入获客渠道管理
+- action: wait_visible
+  element: 获客渠道管理
+- action: click
+  element: 删除
+  description: 删除已被评分配置引用的二级渠道J
+- action: assert_visible
+  element: 确认删除
+- action: click
+  element: 确认删除
+- action: assert_hidden
+  element: 引用检查阻断提示
+  description: 核对是否被引用检查阻断
+- action: assert_text_contains
+  element: 页面
+  expect: 删除成功
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 返回清洗评分规则
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: assert_visible
+  element: 配置行
+- action: assert_text_contains
+  element: 配置行
+  expect: '0'
+tags:
+- compiled
+- needs_fixture
+meta:
+  needs_review: true
+  review_notes: 用例依赖造数：需预先在【获客渠道评分】中引用二级渠道J，并确保账号可操作【获客渠道管理】删除二级渠道。自动集暂不执行，仅编译可 UI
+    部分。
+  compile_backend: deepseek
+  llm_profile: deepseek
+  needs_fixture: true

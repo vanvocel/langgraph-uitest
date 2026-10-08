@@ -1,0 +1,30 @@
+# Element Plus message / notification (墨斗登录与业务站使用 el-message)
+selectors:
+  - ".el-message"
+  - ".el-notification"
+
+# class 片段 → level
+level_markers:
+  error:
+    - "--error"
+    - "is-error"
+  success:
+    - "--success"
+    - "is-success"
+  warning:
+    - "--warning"
+    - "is-warning"
+  info:
+    - "--info"
+    - "is-info"
+
+# 未写 forbid 时，对 click/fill/select/hover 默认禁止这些级别。
+# open / click_if_visible 不默认禁止：打开页面、展开筛选、重置时的接口 error toast 不阻断后续步骤。
+default_forbid_levels:
+  - error
+
+# 仅 forbid、且没有「必须出现的 toast」时，最短观察时间（毫秒）
+# 用来接住一闪而过的 toast，不必把 window_ms 睡满
+settle_ms: 800
+
+default_window_ms: 3000

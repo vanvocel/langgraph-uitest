@@ -1,0 +1,70 @@
+case_id: TC-QXGZ-003
+title: 添加渠道支持搜索多选且已添加渠道置灰不可重复勾选
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: click
+  element: 修改
+  description: 进入编辑态
+- action: click
+  element: 添加渠道
+  description: 打开添加渠道选择器
+- action: wait_visible
+  element: 渠道搜索框
+- action: fill
+  element: 渠道搜索框
+  value: 已添加渠道关键字
+  description: 搜索已添加渠道关键字
+- action: assert_visible
+  element: 已添加渠道选项
+- action: assert_hidden
+  element: 已添加渠道勾选框
+  description: 已添加渠道置灰不可重复勾选
+- action: fill
+  element: 渠道搜索框
+  value: 未添加渠道关键字
+  description: 搜索未添加渠道关键字
+- action: assert_visible
+  element: 未添加渠道选项
+- action: multi_select
+  element: 渠道选择器
+  value: 未添加渠道A,未添加渠道B
+  description: 勾选多条未添加渠道
+- action: click
+  element: 确认添加
+- action: assert_visible
+  element: 配置表
+- action: assert_column
+  element: 配置表
+  expect: contains:未添加渠道A
+- action: assert_column
+  element: 配置表
+  expect: contains:未添加渠道B
+- action: assert_count
+  element: 配置表渠道行
+  expect: 本次仅新增勾选渠道行
+tags:
+- compiled
+meta:
+  needs_review: true
+  review_notes: 依赖前置数据：至少 2 条符合候选条件的二级渠道，其中 1 条已添加到获客渠道评分。搜索关键字与具体渠道名未在 NL 中给出，需人工确认或造数。置灰不可勾选的断言方式（disabled
+    属性/不可点击）需人工确认。
+  compile_backend: deepseek
+  llm_profile: deepseek

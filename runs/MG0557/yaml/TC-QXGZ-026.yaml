@@ -1,0 +1,61 @@
+case_id: TC-QXGZ-026
+title: 无效线索重新激活后已清洗次数不清零
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: wait_visible
+  element: 已清洗次数评分
+- action: assert_visible
+  element: 已清洗次数评分
+  description: 确认场景启用【已清洗次数评分】
+- action: capture_column
+  element: 线索 ID
+  value: col_列表表格
+  description: 记录无效前已清洗次数
+- action: capture_column
+  element: 线索 ID
+  value: col_列表表格
+  description: 记录无效前命中档位
+- action: click
+  element: 重新激活
+  description: 将该无效线索重新激活
+- action: wait_visible
+  element: 查询
+- action: click
+  element: 查询
+  description: 再次触发清洗评分
+- action: assert_column
+  element: 列表表格
+  expect: gte:1
+  description: 重新激活后已清洗次数保持原值不清零
+- action: assert_column
+  element: 列表表格
+  expect: contains:已清洗次数
+  description: 仍按原次数匹配对应档位
+tags:
+- compiled
+- needs_fixture
+meta:
+  needs_review: true
+  review_notes: 用例依赖造数：需准备已清洗次数≥1且已标记无效的线索，并支持重新激活；重新激活与再次触发清洗评分的具体 UI 入口未在 NL 中明确，步骤仅编译到可
+    UI 部分，需人工确认入口与断言元素。
+  compile_backend: deepseek
+  llm_profile: deepseek
+  needs_fixture: true

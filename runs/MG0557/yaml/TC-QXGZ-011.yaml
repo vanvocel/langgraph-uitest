@@ -1,0 +1,53 @@
+case_id: TC-QXGZ-011
+title: 关联平台停用或删除不影响已配置获客渠道评分行
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+- description: 【获客渠道评分】已配置与某关联平台绑定的二级渠道F并设分值
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: wait_visible
+  element: 获客渠道评分
+- action: assert_visible
+  element: 渠道F配置行
+  description: 确认渠道F配置行存在
+- action: assert_text_contains
+  element: 渠道F配置行
+  expect: 渠道F
+  description: 确认渠道F配置行展示
+- action: assert_value
+  element: 渠道F得分
+  expect: 原分值
+  description: 确认渠道F分值未被清零
+- action: assert_hidden
+  element: 渠道F置灰
+  description: 确认渠道F配置行未因平台停用/删除而置灰
+- action: assert_text_contains
+  element: 页面
+  expect: 评分仍按二级渠道ID匹配原分值
+  description: 确认评分仍按二级渠道ID匹配原分值
+tags:
+- compiled
+- needs_fixture
+meta:
+  needs_review: true
+  review_notes: 用例依赖跨模块造数与故障注入：需先配置与某关联平台绑定的二级渠道F并设分值，再停用/删除该关联平台，并触发命中F的客资评分。自动集暂不执行，仅编译可
+    UI 部分。
+  compile_backend: deepseek
+  llm_profile: deepseek
+  needs_fixture: true

@@ -1,0 +1,49 @@
+case_id: TC-MG0473-025
+title: 导出后可打开下载中心且列表清洗次数列仍在
+requirement_id: MG0473
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/pool/clean
+  description: 打开清洗池
+- action: wait_visible
+  element: 人工待清洗
+- action: click
+  element: 人工待清洗
+- action: click_if_visible
+  element: 展开筛选
+- action: click_if_visible
+  element: 全部
+- action: click_if_visible
+  element: 重置
+- action: wait_visible
+  element: 查询
+- action: click
+  element: 查询
+- action: assert_headers
+  element: 列表表格
+  expect: 清洗次数
+- action: click
+  element: 导出
+- action: click
+  element: 下载中心
+- action: assert_visible
+  element: 下载中心
+tags:
+- compiled
+- MG0473
+- live
+meta:
+  needs_review: false
+  compile_backend: deepseek
+  llm_profile: deepseek

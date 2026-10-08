@@ -1,0 +1,42 @@
+case_id: TC-QXGZ-033
+title: 配置未形成分层结构时层差校验不阻断保存
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页面
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: click
+  element: 修改
+  description: 进入编辑态
+- action: click
+  element: 保存
+  description: 在未形成分层结构的配置下点击保存
+- action: assert_hidden
+  element: 层差阻断提示
+  description: 核对不出现层差阻断提示
+- action: assert_text_contains
+  element: 页面
+  expect: 保存成功
+  description: 核对走常规保存流程并成功保存
+tags:
+- compiled
+meta:
+  needs_review: true
+  review_notes: 前置条件依赖账号具备编辑清洗评分规则权限，且需将各启用维度配置为同量纲、未形成分层结构；具体维度与量纲配置方式未在 NL 中明确，需人工确认或补充数据准备步骤。
+  compile_backend: deepseek
+  llm_profile: deepseek

@@ -1,0 +1,46 @@
+case_id: TC-QXGZ-016
+title: AI外呼回传后客资命中AI清洗评分档位得分
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: assert_visible
+  element: AI清洗评分
+- action: assert_text_contains
+  element: AI清洗评分档位分
+  expect: '6000'
+- action: assert_text_contains
+  element: AI清洗评分
+  expect: 最近一次为 AI 外呼
+- action: assert_text_contains
+  element: AI清洗评分维度得分
+  expect: '0'
+- action: assert_text_contains
+  element: AI清洗评分维度得分
+  expect: '6000'
+tags:
+- compiled
+- manual
+- ai_outbound
+meta:
+  needs_review: true
+  review_notes: 依赖第三方 AI 外呼回传与人工造数，自动集不执行；步骤仅编译到可 UI 部分，回传动作需人工完成。
+  compile_backend: deepseek
+  llm_profile: deepseek
+  manual_only: true

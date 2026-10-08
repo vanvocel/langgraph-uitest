@@ -1,0 +1,77 @@
+case_id: TC-QXGZ-013
+title: 主数据改名或调序后配置页与评分实时使用最新名称排序
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+- description: 【获客渠道评分】已按二级渠道ID配置渠道G，且渠道G的一级/二级名称与排序号可在【获客渠道管理】中修改
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: wait_visible
+  element: 获客渠道评分
+- action: click
+  element: 获客渠道管理
+- action: wait_visible
+  element: 渠道G
+- action: click
+  element: 渠道G
+- action: click
+  element: 修改
+- action: fill
+  element: 一级渠道名称
+  value: 渠道G-新一级
+- action: fill
+  element: 二级渠道名称
+  value: 渠道G-新二级
+- action: fill
+  element: 排序号
+  value: '99'
+- action: click
+  element: 保存
+- action: wait_visible
+  element: 渠道G-新二级
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 刷新清洗评分规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: wait_visible
+  element: 获客渠道评分
+- action: assert_text_contains
+  element: 获客渠道评分
+  expect: 渠道G-新一级
+- action: assert_text_contains
+  element: 获客渠道评分
+  expect: 渠道G-新二级
+- action: assert_column
+  element: 获客渠道评分
+  expect: contains:渠道G-新二级
+- action: assert_count
+  element: 获客渠道评分
+  expect: '1'
+- action: assert_text_not_contains
+  element: 获客渠道评分
+  expect: 渠道G-旧二级
+tags:
+- compiled
+meta:
+  needs_review: true
+  review_notes: 前置依赖【获客渠道管理】中已存在按二级渠道ID配置的渠道G，且可修改其一级/二级名称与排序号，属于人工造数/数据准备，UI 步骤仅覆盖可操作部分。
+  compile_backend: deepseek
+  llm_profile: deepseek

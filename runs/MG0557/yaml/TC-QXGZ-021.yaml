@@ -1,0 +1,65 @@
+case_id: TC-QXGZ-021
+title: 已清洗次数评分固定五档及默认种子值展示
+requirement_id: MG0557
+base_url: https://lead.z-niu.com
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      toasts: []
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/rule/clean/
+  description: 打开清洗规则页
+- action: wait_visible
+  element: 清洗评分规则
+- action: click
+  element: 清洗评分规则
+- action: wait_visible
+  element: 已清洗次数评分
+- action: assert_headers
+  element: 列表表格
+  expect: 清洗次数档位,得分
+- action: assert_column
+  element: 清洗次数档位
+  expect: contains:未清洗
+- action: assert_column
+  element: 清洗次数档位
+  expect: contains:已首次清洗
+- action: assert_column
+  element: 清洗次数档位
+  expect: contains:已二次清洗
+- action: assert_column
+  element: 清洗次数档位
+  expect: contains:已三次清洗
+- action: assert_column
+  element: 清洗次数档位
+  expect: contains:已三次以上清洗
+- action: assert_column
+  element: 得分
+  expect: contains:10000
+- action: assert_column
+  element: 得分
+  expect: contains:5000
+- action: assert_column
+  element: 得分
+  expect: contains:3000
+- action: assert_column
+  element: 得分
+  expect: contains:1500
+- action: assert_column
+  element: 得分
+  expect: contains:0
+tags:
+- compiled
+meta:
+  needs_review: true
+  review_notes: 依赖租户为新下发或可核对默认种子的环境，默认种子值需人工确认；档位名称与顺序断言使用 assert_column/assert_text_contains
+    组合，具体列名以实际页面为准。
+  compile_backend: deepseek
+  llm_profile: deepseek

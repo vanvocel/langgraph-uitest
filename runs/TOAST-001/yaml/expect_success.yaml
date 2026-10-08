@@ -1,0 +1,19 @@
+case_id: TC_TOAST_SUCCESS
+title: 期望成功 toast
+requirement_id: TOAST-001
+base_url: fixture://
+steps:
+  - action: open
+    url: index.html
+    description: 打开 toast 实验页
+    observe:
+      forbid_toast_levels: []
+  - action: click
+    element: 保存成功按钮
+    description: 点击保存
+    observe:
+      window_ms: 3000
+      forbid_toast_levels: []
+      toasts:
+        - expect: success
+          contains: 保存成功

@@ -1,0 +1,34 @@
+case_id: TC_TOAST_FROZEN_ORG
+title: 默认组织账号冻结应出现失败 toast
+requirement_id: TOAST-LIVE
+base_url: https://login.z-niu.com/
+tags:
+  - toast
+  - expect-error
+steps:
+  - action: open
+    url: https://login.z-niu.com/
+    description: 打开登录页
+    observe:
+      forbid_toast_levels: []
+  - action: fill
+    element: 用户名输入框
+    value: "16676583008"
+    description: 输入手机号（不改默认组织）
+  - action: wait_visible
+    element: 组织下拉
+    timeout_ms: 10000
+    description: 等待默认组织出现
+  - action: fill
+    element: 密码输入框
+    value: wrong-password
+    description: 输入密码
+  - action: click
+    element: 登录按钮
+    description: 点击登录，期望出现账号冻结 toast
+    observe:
+      window_ms: 8000
+      forbid_toast_levels: []
+      toasts:
+        - expect: error
+          contains: 账号已冻结，请先联系管理员

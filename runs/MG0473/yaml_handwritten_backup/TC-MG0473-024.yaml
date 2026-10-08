@@ -1,0 +1,48 @@
+case_id: TC-MG0473-024
+title: 批量领取弹窗按领取类型勾选不受清洗次数筛选影响
+requirement_id: MG0473
+base_url: https://lead.z-niu.com
+tags:
+- MG0473
+- live
+- excel
+meta:
+  live_notes: 现网弹窗是领取类型（新线索/继续清洗等），首屏无已清洗次数复选
+preconditions:
+- auth: logged_in
+  account_ref: default_tester
+defaults:
+  on_action:
+    observe:
+      window_ms: 8000
+      forbid_toast_levels:
+      - error
+steps:
+- action: open
+  url: https://lead.z-niu.com/pool/clean
+  description: 打开清洗池
+- action: wait_visible
+  element: 人工待清洗
+- action: click
+  element: 人工待清洗
+  description: 进入人工待清洗
+- action: click_if_visible
+  element: 展开筛选
+- action: click_if_visible
+  element: 全部
+- action: click_if_visible
+  element: 重置
+- action: wait_visible
+  element: 查询
+- action: click
+  element: 批量领取
+- action: wait_visible
+  element: 弹窗
+- action: assert_text_contains
+  element: 弹窗
+  expect: 继续清洗
+- action: assert_text_not_contains
+  element: 弹窗
+  expect: 已清洗次数
+- action: click
+  element: 弹窗关闭
