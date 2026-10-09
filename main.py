@@ -114,7 +114,40 @@ def cmd_run(args: argparse.Namespace) -> int:
         else:
             print(f"Excel backfill failed: {excel_summary}")
 
+    if not args.smoke:
+        from framework.notify import notify_report, should_notify_after_run
+
+        if should_notify_after_run():
+            for item in notify_report(args.req, exit_code=completed.returncode):
+                flag = "ok" if item.ok else "FAIL"
+                print(f"Notify [{flag}] {item.channel}: {item.message}")
+
     return completed.returncode
+
+
+def cmd_notify(args: argparse.Namespace) -> int:
+    """Send latest Excel/HTML report for a requirement (no re-run)."""
+    from framework.notify import notify_report
+
+    results = notify_report(
+        args.req,
+        exit_code=getattr(args, "exit_code", None),
+        channels=getattr(args, "channel", None),
+        force=True,
+    )
+    failed = 0
+    for item in results:
+        flag = "ok" if item.ok else "FAIL"
+        print(f"[{flag}] {item.channel}: {item.message}")
+        if item.details.get("uploaded"):
+            for u in item.details["uploaded"]:
+                print(f"      uploaded: {u.get('name')}")
+        if item.details.get("errors"):
+            for err in item.details["errors"]:
+                print(f"      upload error: {err.get('file')}: {err.get('error')}")
+        if not item.ok:
+            failed += 1
+    return 1 if failed else 0
 
 
 def cmd_excel_backfill(args: argparse.Namespace) -> int:
@@ -158,6 +191,7 @@ def cmd_compile(args: argparse.Namespace) -> int:
             args.req,
             llm_profile=args.llm,
             force_backend=force,
+            case_ids=getattr(args, "case", None),
         )
     except FileNotFoundError as exc:
         print(exc)
@@ -261,6 +295,25 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_run.set_defaults(func=cmd_run)
 
+    p_notify = sub.add_parser(
+        "notify",
+        help="Send latest Excel/HTML test report (Feishu etc., no re-run)",
+    )
+    p_notify.add_argument("--req", required=True, help="Requirement id")
+    p_notify.add_argument(
+        "--channel",
+        action="append",
+        default=None,
+        help="Only these channels (repeatable). Default: enabled channels in config/notify.yaml",
+    )
+    p_notify.add_argument(
+        "--exit-code",
+        type=int,
+        default=None,
+        help="Optional exit code to show in the summary text",
+    )
+    p_notify.set_defaults(func=cmd_notify)
+
     p_compile = sub.add_parser(
         "compile",
         help="NL → YAML via LLM (required for all requirements)",
@@ -275,6 +328,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--allow-stub",
         action="store_true",
         help="Allow offline stub (tests/debug only; not for real Excel/NL cases)",
+    )
+    p_compile.add_argument(
+        "--case",
+        action="append",
+        default=None,
+        help="Only compile these case_id values (repeatable). Default: all NL files",
     )
     p_compile.set_defaults(func=cmd_compile)
 

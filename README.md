@@ -14,7 +14,8 @@
 | Excel → NL | 将用例表整理为自然语言（可脚本生成） |
 | `compile` | **必须走大模型**，NL → `yaml/<case_id>.yaml`（覆盖同名文件） |
 | `discover` | 根据 YAML 元素名在页面上绑定 POM 定位器 |
-| `run` | 执行 YAML，生成 Allure，并回填 Excel（通过/失败/Block + 截图） |
+| `run` | 执行 YAML，生成 Allure，回填 Excel；若开启 notify 则自动发报告 |
+| `notify` | 仅发送已有 Excel/HTML 报告（不重跑） |
 | `excel-backfill` | 仅根据已有 Allure 结果回填 Excel（不重跑） |
 
 自动执行会跳过带以下标记的用例：`manual` / `ai_outbound` / `needs_fixture`（或 `meta.manual_only` / `meta.needs_fixture`）。
@@ -184,6 +185,34 @@ Excel「测试结果」取值：
 - **通过**：自动执行 passed
 - **失败**：自动执行 failed/broken（含截图）
 - **Block**：人工/AI外呼、需造数、或本次未执行
+
+### 步骤 7：测试报告自动通知（可选）
+
+`run` 结束后可自动发送；也可单独补发：
+
+```bash
+python main.py notify --req MG0557
+```
+
+`.env` 填凭证与报告访问根地址，`config/notify.yaml` 打开开关：
+
+```text
+FEISHU_APP_ID=cli_xxx
+FEISHU_APP_SECRET=xxx
+FEISHU_CHAT_ID=oc_xxx
+REPORT_BASE_URL=https://uitest.example.com/reports
+```
+
+飞书消息会带 **报告链接**（不再上传超大 HTML）。服务器用 Nginx 把该前缀指到项目 `runs/`：
+
+```nginx
+location /reports/ {
+    alias /opt/LangGraph-uitest/runs/;
+    autoindex off;
+}
+```
+
+本地可临时起静态服务验证：`python -m http.server 8080 --directory runs`，并设 `REPORT_BASE_URL=http://127.0.0.1:8080`。
 
 仅用已有 Allure 重新回填（不重跑浏览器）：
 

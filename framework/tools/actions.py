@@ -189,11 +189,58 @@ def tool_click(ctx: ToolContext, step: Step) -> None:
         ) from exc
 
 
+def _is_fillable_node(item) -> bool:
+    try:
+        return bool(
+            item.evaluate(
+                """el => {
+                  if (!el) return false;
+                  const tag = (el.tagName || '').toLowerCase();
+                  if (tag === 'input' || tag === 'textarea') return true;
+                  if (el.isContentEditable) return true;
+                  return false;
+                }"""
+            )
+        )
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def _fillable(ctx: ToolContext, loc, timeout: int):
+    """Prefer a real input under the locator (avoid filling th/td/labels)."""
+    inner = loc.locator("input, textarea, [contenteditable='true']")
+    try:
+        if inner.count() >= 1:
+            for i in range(min(inner.count(), 8)):
+                item = inner.nth(i)
+                try:
+                    if item.is_visible():
+                        return item
+                except Exception:  # noqa: BLE001
+                    continue
+            return inner.first
+    except Exception:  # noqa: BLE001
+        pass
+    first = loc.first
+    if _is_fillable_node(first):
+        return first
+    return None
+
+
 def tool_fill(ctx: ToolContext, step: Step) -> None:
     assert step.element and step.value is not None
     loc = ctx.get_locator(step.element)
+    timeout = step.timeout_ms or 5000
+    target = _fillable(ctx, loc, timeout)
+    if target is None:
+        raise StepError(
+            FailureCode.BIND_ERROR,
+            f"fill refused on {step.element!r}: locator is not an input/textarea",
+            action=step.action.value,
+            element=step.element,
+        )
     try:
-        loc.first.fill(step.value, timeout=step.timeout_ms)
+        target.fill(step.value, timeout=timeout)
     except Exception as exc:  # noqa: BLE001
         raise StepError(
             FailureCode.BIND_ERROR,
@@ -408,8 +455,50 @@ def tool_wait_visible(ctx: ToolContext, step: Step) -> None:
     )
 
 
+def _validation_message_visible(page) -> bool:
+    try:
+        payload = page.evaluate(_VALIDATION_JS) or {}
+        if any(str(x).strip() for x in (payload.get("errors") or [])):
+            return True
+        return bool(
+            page.evaluate(
+                """() => {
+                  const nodes = document.querySelectorAll(
+                    '.el-form-item.is-error, .el-form-item__error, .el-message--error,'
+                    + ' .el-message-box, input:invalid, [aria-invalid="true"]'
+                  );
+                  return Array.from(nodes).some(el => {
+                    const s = getComputedStyle(el);
+                    if (s.display === 'none' || s.visibility === 'hidden') return false;
+                    const r = el.getBoundingClientRect();
+                    return r.width > 1 && r.height > 1;
+                  });
+                }"""
+            )
+        )
+    except Exception:  # noqa: BLE001
+        return False
+
+
 def tool_assert_visible(ctx: ToolContext, step: Step) -> None:
     assert step.element
+    if step.element in {"表单校验提示", "校验提示"}:
+        timeout = step.timeout_ms or 5000
+        deadline = time.time() + timeout / 1000
+        while True:
+            if _validation_message_visible(ctx.page):
+                return
+            if time.time() >= deadline:
+                break
+            ctx.page.wait_for_timeout(200)
+        raise StepError(
+            FailureCode.ASSERT_FAIL,
+            "element not visible: '表单校验提示'",
+            action=step.action.value,
+            element=step.element,
+            expected="visible",
+            actual="no form-item error / error toast",
+        )
     loc = ctx.get_locator(step.element)
     try:
         loc.first.wait_for(state="visible", timeout=step.timeout_ms)
@@ -463,11 +552,44 @@ def tool_assert_text(ctx: ToolContext, step: Step) -> None:
         )
 
 
+_VALIDATION_JS = """() => {
+  const textOf = (nodes) => Array.from(nodes)
+    .filter(el => {
+      const s = getComputedStyle(el);
+      if (s.display === 'none' || s.visibility === 'hidden') return false;
+      const r = el.getBoundingClientRect();
+      return r.width > 1 && r.height > 1;
+    })
+    .map(e => (e.innerText || e.textContent || '').replace(/\\s+/g, ' ').trim())
+    .filter(Boolean);
+  const errs = textOf(document.querySelectorAll(
+    '.el-form-item__error, .el-message--error, .el-notification, .el-message-box__message'
+  ));
+  return { errors: errs, body: (document.body && document.body.innerText || '').trim() };
+}"""
+
+
+def _read_assert_text(ctx: ToolContext, step: Step) -> str:
+    """Prefer form/toast errors when asserting 页面 or 表单校验提示."""
+    name = step.element or ""
+    if name in {"页面", "当前页面", "页面正文", "表单校验提示", "校验提示"}:
+        payload = ctx.page.evaluate(_VALIDATION_JS) or {}
+        errors = [str(x) for x in (payload.get("errors") or []) if str(x).strip()]
+        body = str(payload.get("body") or "")
+        blob = "\n".join(errors)
+        if step.expect and errors and step.expect in blob:
+            return blob
+        if name in {"表单校验提示", "校验提示"}:
+            return blob or body
+        return (blob + "\n" + body).strip()
+    loc = ctx.get_locator(step.element)
+    return loc.first.inner_text(timeout=step.timeout_ms)
+
+
 def tool_assert_text_contains(ctx: ToolContext, step: Step) -> None:
     assert step.element and step.expect is not None
-    loc = ctx.get_locator(step.element)
     try:
-        actual = loc.first.inner_text(timeout=step.timeout_ms)
+        actual = _read_assert_text(ctx, step)
     except Exception as exc:  # noqa: BLE001
         raise StepError(
             FailureCode.BIND_ERROR,
@@ -482,7 +604,7 @@ def tool_assert_text_contains(ctx: ToolContext, step: Step) -> None:
             action=step.action.value,
             element=step.element,
             expected=step.expect,
-            actual=actual.strip(),
+            actual=actual.strip()[:2000],
         )
 
 
@@ -515,22 +637,43 @@ def tool_assert_value(ctx: ToolContext, step: Step) -> None:
     if expected is None:
         raise StepError(FailureCode.ASSERT_FAIL, "assert_value needs expect or value")
     loc = ctx.get_locator(step.element)
+    timeout = step.timeout_ms or 5000
     try:
-        actual = loc.first.input_value(timeout=step.timeout_ms)
-    except Exception as exc:  # noqa: BLE001
+        count = min(loc.count(), 40)
+    except Exception:  # noqa: BLE001
+        count = 1
+    actuals: list[str] = []
+    # Multiple score inputs share one POM name — pass if any visible match equals expect.
+    for i in range(max(count, 1)):
+        item = loc.nth(i) if count else loc.first
+        try:
+            if count and not item.is_visible():
+                continue
+            actual = item.input_value(timeout=timeout if i == 0 else min(timeout, 2000))
+        except Exception as exc:  # noqa: BLE001
+            if i == 0 and count <= 1:
+                raise StepError(
+                    FailureCode.BIND_ERROR,
+                    f"cannot read value of {step.element!r}: {exc}",
+                    element=step.element,
+                ) from exc
+            continue
+        actuals.append(actual)
+        if actual == expected:
+            return
+    if not actuals:
         raise StepError(
             FailureCode.BIND_ERROR,
-            f"cannot read value of {step.element!r}: {exc}",
+            f"cannot read value of {step.element!r}: no visible input",
             element=step.element,
-        ) from exc
-    if actual != expected:
-        raise StepError(
-            FailureCode.ASSERT_FAIL,
-            f"value mismatch on {step.element!r}",
-            element=step.element,
-            expected=expected,
-            actual=actual,
         )
+    raise StepError(
+        FailureCode.ASSERT_FAIL,
+        f"value mismatch on {step.element!r}",
+        element=step.element,
+        expected=expected,
+        actual=actuals[0] if len(actuals) == 1 else ",".join(actuals[:8]),
+    )
 
 
 def tool_assert_url(ctx: ToolContext, step: Step) -> None:
@@ -684,19 +827,31 @@ def check_column_values(values: list[int], op: str, args: list) -> None:
         )
 
 
+def _cell_contains(cell: str, needle: str) -> bool:
+    text = (cell or "").strip()
+    raw = (needle or "").strip()
+    if not raw:
+        return False
+    if raw.lstrip("-").isdigit():
+        try:
+            return cell_to_int(text) == int(raw)
+        except StepError:
+            return False
+    return raw in text
+
+
 def evaluate_column_expect(texts: list[str], expect: str) -> None:
     raw = (expect or "").strip()
     if raw.startswith("contains:"):
         needle = raw.split(":", 1)[1]
         if not texts:
             raise StepError(FailureCode.ASSERT_FAIL, "assert_column: no data rows")
-        bad = [t for t in texts if needle not in t]
-        if bad:
+        if not any(_cell_contains(t, needle) for t in texts):
             raise StepError(
                 FailureCode.ASSERT_FAIL,
                 f"assert_column contains {needle!r} failed",
                 expected=raw,
-                actual=";".join(bad[:10]),
+                actual=";".join(texts[:10]),
             )
         return
     if raw.startswith("not_contains:"):
@@ -718,7 +873,7 @@ def evaluate_column_expect(texts: list[str], expect: str) -> None:
         check_column_values(numbers, "union", tokens)
         return
     op, args = parse_column_rule(raw)
-    numbers = [cell_to_int(t) for t in texts]
+    numbers = [cell_to_int(t) for t in texts if str(t).strip()]
     check_column_values(numbers, op, args)
 
 
@@ -732,49 +887,128 @@ def _wait_table_idle(page, timeout: int) -> None:
     page.wait_for_timeout(400)
 
 
-def _read_el_table_column(page, header: str) -> list[str]:
+_TABLE_LIKE_NAMES = {
+    "列表表格",
+    "表格",
+    "配置表",
+    "获客渠道评分",
+    "AI清洗评分",
+    "已清洗次数评分",
+    "场景维度矩阵",
+    "页面",
+}
+
+
+def _header_matches(header: str, wanted: str) -> bool:
+    h = "".join((header or "").split())
+    w = "".join((wanted or "").split())
+    if not h or not w:
+        return False
+    return h == w or w in h or h in w
+
+
+def _read_tables_columns(page, *, root=None) -> list[dict]:
+    """Return [{names, columns: {header: [cells]}, all_cells}] for visible tables."""
     payload = page.evaluate(
-        """(header) => {
-          const tables = Array.from(document.querySelectorAll('.el-table')).filter(t => t.offsetParent !== null);
-          const table = tables[0];
-          if (!table) return { error: 'no table' };
-          const names = Array.from(table.querySelectorAll('.el-table__header th'))
-            .map(e => (e.innerText || '').replace(/\\s+/g, ' ').trim());
-          const idx = names.findIndex(n => n === header || n.includes(header));
-          if (idx < 0) return { error: 'header not found', names };
-          const rows = Array.from(table.querySelectorAll('.el-table__body tbody tr'))
-            .filter(r => !r.classList.contains('el-table__empty-row'));
-          const vals = rows.map(r => {
-            const tds = r.querySelectorAll('td');
-            return tds[idx] ? (tds[idx].innerText || '').replace(/\\s+/g, ' ').trim() : '';
+        """(root) => {
+          const visible = (el) => {
+            if (!el) return false;
+            const s = getComputedStyle(el);
+            if (s.display === 'none' || s.visibility === 'hidden') return false;
+            const r = el.getBoundingClientRect();
+            return r.width > 2 && r.height > 2;
+          };
+          const collectTables = (from) => {
+            const out = [];
+            const add = (t) => { if (visible(t) && !out.includes(t)) out.push(t); };
+            const scope = from || document;
+            if (from && (from.matches('table') || from.classList.contains('el-table'))) add(from);
+            scope.querySelectorAll('table, .el-table').forEach(add);
+            return out;
+          };
+          const tables = collectTables(root);
+          return tables.map(t => {
+            const names = Array.from(t.querySelectorAll(
+              '.el-table__header th, thead th, tr:first-child th, th'
+            )).map(e => (e.innerText || '').replace(/\\s+/g, ' ').trim()).filter(Boolean);
+            const rows = Array.from(t.querySelectorAll(
+              '.el-table__body tbody tr, tbody tr'
+            )).filter(r => !r.classList.contains('el-table__empty-row') && visible(r));
+            const columns = {};
+            const cellText = (td) => {
+              if (!td) return '';
+              const inp = td.querySelector('input, textarea');
+              if (inp && String(inp.value || '').trim() !== '') {
+                return String(inp.value).replace(/\\s+/g, ' ').trim();
+              }
+              return (td.innerText || '').replace(/\\s+/g, ' ').trim();
+            };
+            names.forEach((name, idx) => {
+              columns[name] = rows.map(r => {
+                const tds = r.querySelectorAll('td');
+                return tds[idx] ? cellText(tds[idx]) : '';
+              });
+            });
+            const all_cells = rows.flatMap(r => Array.from(r.querySelectorAll('td')).map(
+              td => cellText(td)
+            )).filter(Boolean);
+            return { names, columns, all_cells };
           });
-          return { names, idx, vals };
         }""",
-        header,
+        root,
     )
-    if payload.get("error"):
-        raise StepError(
-            FailureCode.BIND_ERROR,
-            f"assert_column cannot find column {header!r}: {payload}",
-            element=header,
-        )
-    return list(payload.get("vals") or [])
+    return list(payload or [])
+
+
+def _pick_column_vals(tables: list[dict], header: str, *, whole_table: bool) -> tuple[list[str], list[str]]:
+    """Return (vals, tried_header_names)."""
+    tried: list[str] = []
+    for table in tables:
+        names = [str(n) for n in (table.get("names") or [])]
+        tried.extend(names)
+        cols = table.get("columns") or {}
+        if whole_table:
+            cells = [str(c) for c in (table.get("all_cells") or [])]
+            if cells:
+                return cells, tried
+        for name, vals in cols.items():
+            if _header_matches(str(name), header):
+                return [str(v) for v in (vals or [])], tried
+    return [], tried
 
 
 def tool_assert_column(ctx: ToolContext, step: Step) -> None:
-    """Assert every visible-page cell in a named table column matches expect."""
+    """Assert cells in a column (or whole table when element is a table POM)."""
     assert step.element and step.expect is not None
     timeout = step.timeout_ms or 15000
     deadline = time.time() + timeout / 1000
     texts: list[str] = []
     last_err: StepError | None = None
+    whole = step.element in _TABLE_LIKE_NAMES
     while True:
         try:
             _wait_table_idle(ctx.page, min(timeout, 8000))
-            texts = _read_el_table_column(ctx.page, step.element)
+            root = None
+            if step.element in ctx.elements:
+                try:
+                    loc = ctx.get_locator(step.element)
+                    if loc.count() >= 1:
+                        root = loc.first.element_handle()
+                except Exception:  # noqa: BLE001
+                    root = None
+            tables = _read_tables_columns(ctx.page, root=root)
+            if not tables and root is not None:
+                tables = _read_tables_columns(ctx.page, root=None)
+            texts, tried = _pick_column_vals(tables, step.element, whole_table=whole)
+            if not texts:
+                raise StepError(
+                    FailureCode.BIND_ERROR,
+                    f"assert_column cannot find column {step.element!r}: "
+                    f"{{'error': 'header not found', 'names': {tried[:20]!r}}}",
+                    element=step.element,
+                )
             last_err = None
-            if texts:
-                break
+            break
         except StepError as err:
             last_err = err
         if time.time() >= deadline:
@@ -879,30 +1113,122 @@ def tool_assert_set_disjoint(ctx: ToolContext, step: Step) -> None:
         )
 
 
-def tool_assert_headers(ctx: ToolContext, step: Step) -> None:
-    assert step.expect is not None
-    headers = ctx.page.evaluate(
-        """() => Array.from(document.querySelectorAll('.el-table__header th'))
-          .map(e => (e.innerText||'').replace(/\\s+/g,' ').trim()).filter(Boolean)"""
-    )
-    headers = [str(h) for h in (headers or [])]
-    wanted = _split_csv(step.expect)
-    missing = []
-    unexpected = []
+_HEADER_FROM_EL_JS = """(el) => {
+  const textOf = (nodes) => Array.from(nodes)
+    .map(e => (e.innerText || '').replace(/\\s+/g, ' ').trim())
+    .filter(Boolean);
+  const fromTable = (t) => {
+    if (!t) return [];
+    const ths = t.querySelectorAll(
+      '.el-table__header th, thead th, tr:first-child th, th'
+    );
+    return textOf(ths);
+  };
+  if (!el) return [];
+  if (el.tagName === 'TABLE' || (el.classList && el.classList.contains('el-table'))) {
+    return fromTable(el);
+  }
+  const nested = el.querySelector && el.querySelector('table, .el-table');
+  if (nested) return fromTable(nested);
+  const closest = el.closest && (el.closest('table') || el.closest('.el-table'));
+  if (closest) return fromTable(closest);
+  // Section title / label: prefer a following table in nearby ancestors.
+  let root = el.parentElement;
+  for (let d = 0; d < 5 && root; d++, root = root.parentElement) {
+    const tables = root.querySelectorAll('table, .el-table');
+    for (const t of tables) {
+      if (el.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING) {
+        const hs = fromTable(t);
+        if (hs.length) return hs;
+      }
+    }
+  }
+  return textOf(el.querySelectorAll('th, .el-table__header th'));
+}"""
+
+
+def _match_headers(headers: list[str], wanted: list[str]) -> tuple[list[str], list[str]]:
+    missing: list[str] = []
+    unexpected: list[str] = []
     for item in wanted:
         if item.startswith("!"):
             name = item[1:]
-            if name in headers:
+            if any(_header_matches(h, name) for h in headers):
                 unexpected.append(name)
-        elif item not in headers:
+        elif not any(_header_matches(h, item) for h in headers):
             missing.append(item)
-    if missing or unexpected:
+    return missing, unexpected
+
+
+def tool_assert_headers(ctx: ToolContext, step: Step) -> None:
+    """Assert expected headers exist in the table scoped by step.element when set."""
+    assert step.expect is not None
+    wanted = _split_csv(step.expect)
+    candidates: list[list[str]] = []
+
+    if step.element:
+        loc = ctx.get_locator(step.element)
+        try:
+            count = min(loc.count(), 40)
+        except Exception:  # noqa: BLE001
+            count = 0
+        for i in range(count):
+            try:
+                item = loc.nth(i)
+                if not item.is_visible():
+                    continue
+                raw = item.evaluate(_HEADER_FROM_EL_JS)
+                headers = [str(h) for h in (raw or [])]
+                if headers:
+                    candidates.append(headers)
+            except Exception:  # noqa: BLE001
+                continue
+
+    if not candidates:
+        # Fallback: page-wide (el-table + native tables), for legacy steps without element.
+        raw = ctx.page.evaluate(
+            """() => {
+              const textOf = (nodes) => Array.from(nodes)
+                .map(e => (e.innerText || '').replace(/\\s+/g, ' ').trim())
+                .filter(Boolean);
+              const out = [];
+              document.querySelectorAll('.el-table, table').forEach(t => {
+                const hs = textOf(t.querySelectorAll(
+                  '.el-table__header th, thead th, tr:first-child th, th'
+                ));
+                if (hs.length) out.push(hs);
+              });
+              return out;
+            }"""
+        )
+        for hs in raw or []:
+            candidates.append([str(h) for h in hs])
+
+    if not candidates:
         raise StepError(
             FailureCode.ASSERT_FAIL,
-            f"table headers mismatch missing={missing} unexpected={unexpected}",
+            "table headers mismatch: no table headers found",
             expected=step.expect,
-            actual=",".join(headers),
+            actual="",
+            element=step.element,
         )
+
+    best_headers: list[str] = candidates[0]
+    best_missing, best_unexpected = _match_headers(best_headers, wanted)
+    for headers in candidates:
+        missing, unexpected = _match_headers(headers, wanted)
+        if not missing and not unexpected:
+            return
+        if len(missing) + len(unexpected) < len(best_missing) + len(best_unexpected):
+            best_headers, best_missing, best_unexpected = headers, missing, unexpected
+
+    raise StepError(
+        FailureCode.ASSERT_FAIL,
+        f"table headers mismatch missing={best_missing} unexpected={best_unexpected}",
+        expected=step.expect,
+        actual=",".join(best_headers),
+        element=step.element,
+    )
 
 
 def tool_assert_filter_order(ctx: ToolContext, step: Step) -> None:

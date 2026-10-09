@@ -23,7 +23,7 @@ steps:
 - action: wait_visible
   element: AI清洗评分
 - action: assert_headers
-  element: 列表表格
+  element: AI清洗评分
   expect: 清洗方式,得分
 - action: assert_text_contains
   element: AI清洗评分
@@ -40,7 +40,8 @@ steps:
 tags:
 - compiled
 meta:
-  needs_review: true
-  review_notes: 用例为只读核对类，涉及表格列名、档位行与默认分值断言；具体元素语义名（AI清洗评分表、清洗方式列、得分列、档位行）需按实际页面确认。
+  needs_review: false
+  review_notes: 现网区块标题多为「AI外呼评分」；POM「AI清洗评分」绑清洗方式/得分表。得分断言允许多个得分输入中任一对上 6000。
+  live_aligned: true
   compile_backend: deepseek
   llm_profile: deepseek

@@ -5,7 +5,6 @@ base_url: https://lead.z-niu.com
 preconditions:
 - auth: logged_in
   account_ref: default_tester
-- description: 账号可编辑【清洗评分规则】；配置表中至少有 1 条已添加渠道
 defaults:
   on_action:
     observe:
@@ -16,7 +15,7 @@ defaults:
 steps:
 - action: open
   url: https://lead.z-niu.com/rule/clean/
-  description: 打开清洗规则页
+  description: 打开清洗评分规则页
 - action: wait_visible
   element: 清洗评分规则
 - action: click
@@ -24,31 +23,42 @@ steps:
 - action: click
   element: 修改
 - action: fill
-  element: 得分输入框
+  element: 获客渠道得分输入框
   value: ''
 - action: click
   element: 保存
-- action: assert_text_contains
-  element: 页面
-  expect: 合法范围
+  observe:
+    window_ms: 5000
+    toasts: []
+    forbid_toast_levels: []
+- action: assert_visible
+  element: 表单校验提示
 - action: fill
-  element: 得分输入框
+  element: 获客渠道得分输入框
   value: '-1'
 - action: click
   element: 保存
+  observe:
+    window_ms: 5000
+    toasts: []
+    forbid_toast_levels: []
 - action: assert_text_contains
-  element: 页面
+  element: 表单校验提示
   expect: 合法范围
 - action: fill
-  element: 得分输入框
+  element: 获客渠道得分输入框
   value: '100000'
 - action: click
   element: 保存
+  observe:
+    window_ms: 5000
+    toasts: []
+    forbid_toast_levels: []
 - action: assert_text_contains
-  element: 页面
+  element: 表单校验提示
   expect: 合法范围
 - action: fill
-  element: 得分输入框
+  element: 获客渠道得分输入框
   value: '0'
 - action: click
   element: 保存
@@ -57,14 +67,14 @@ steps:
 - action: click
   element: 修改
 - action: fill
-  element: 得分输入框
+  element: 获客渠道得分输入框
   value: '99999'
 - action: click
   element: 保存
 - action: assert_visible
   element: 保存成功
 tags:
-- compiled
+- MG0557
 meta:
   needs_review: false
   compile_backend: deepseek

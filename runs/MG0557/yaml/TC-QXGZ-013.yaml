@@ -70,8 +70,10 @@ steps:
   expect: 渠道G-旧二级
 tags:
 - compiled
+- needs_fixture
 meta:
   needs_review: true
   review_notes: 前置依赖【获客渠道管理】中已存在按二级渠道ID配置的渠道G，且可修改其一级/二级名称与排序号，属于人工造数/数据准备，UI 步骤仅覆盖可操作部分。
   compile_backend: deepseek
   llm_profile: deepseek
+  needs_fixture: true

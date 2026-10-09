@@ -43,8 +43,10 @@ steps:
   element: 已知风险仍保存
 tags:
 - compiled
+- needs_fixture
 meta:
   needs_review: true
   review_notes: 前置需构造校验值不大于基准值的分层配置，属于人工造数/特定数据依赖；弹窗文案与计算明细的具体文本未在 NL 中给出，断言使用语义化描述，需人工核对实际文案。
   compile_backend: deepseek
   llm_profile: deepseek
+  needs_fixture: true

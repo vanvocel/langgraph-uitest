@@ -23,37 +23,37 @@ steps:
 - action: wait_visible
   element: 已清洗次数评分
 - action: assert_headers
-  element: 列表表格
+  element: 已清洗次数评分
   expect: 清洗次数档位,得分
 - action: assert_column
-  element: 清洗次数档位
+  element: 已清洗次数评分
   expect: contains:未清洗
 - action: assert_column
-  element: 清洗次数档位
-  expect: contains:已首次清洗
+  element: 已清洗次数评分
+  expect: contains:首次清洗
 - action: assert_column
-  element: 清洗次数档位
-  expect: contains:已二次清洗
+  element: 已清洗次数评分
+  expect: contains:二次清洗
 - action: assert_column
-  element: 清洗次数档位
-  expect: contains:已三次清洗
+  element: 已清洗次数评分
+  expect: contains:三次清洗
 - action: assert_column
-  element: 清洗次数档位
-  expect: contains:已三次以上清洗
+  element: 已清洗次数评分
+  expect: contains:三次以上
 - action: assert_column
-  element: 得分
+  element: 已清洗次数评分
   expect: contains:10000
 - action: assert_column
-  element: 得分
+  element: 已清洗次数评分
   expect: contains:5000
 - action: assert_column
-  element: 得分
+  element: 已清洗次数评分
   expect: contains:3000
 - action: assert_column
-  element: 得分
+  element: 已清洗次数评分
   expect: contains:1500
 - action: assert_column
-  element: 得分
+  element: 已清洗次数评分
   expect: contains:0
 tags:
 - compiled

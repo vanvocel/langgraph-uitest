@@ -46,8 +46,10 @@ steps:
   expect: 已知层差风险保存
 tags:
 - compiled
+- needs_fixture
 meta:
   needs_review: true
   review_notes: 前置依赖「已触发层差校验不通过弹窗」，该弹窗需通过特定配置触发，具体触发数据未在用例中给出，需人工造数或补充前置步骤。
   compile_backend: deepseek
   llm_profile: deepseek
+  needs_fixture: true

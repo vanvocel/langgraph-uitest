@@ -13,42 +13,41 @@ elements:
   获客渠道评分:
     by: css
     value: table.score-table
-  列表表格:
-    by: css
-    value: table
-  添加渠道:
-    by: role
-    value: button
-    name: 添加渠道
-    exact: true
-  保存:
-    by: role
-    value: button
-    name: 保存
-    exact: true
-  页面:
-    by: css
-    value: body
-  移除:
-    by: css
-    value: table.score-table button[aria-label='移除']
-  取消:
-    by: role
-    value: button
-    name: 取消
-    exact: true
-  AI清洗评分:
-    by: text
-    value: AI清洗评分
-    exact: true
-  已清洗次数评分:
-    by: text
-    value: 已清洗次数评分
-    exact: true
   得分:
     by: text
     value: 得分
     exact: true
+  修改:
+    by: role
+    value: button
+    name: 修改
+    exact: true
+  一级:
+    by: xpath
+    value: //th[normalize-space()='一级' or contains(normalize-space(),'一级渠道')]
+  二级:
+    by: xpath
+    value: //th[normalize-space()='二级' or contains(normalize-space(),'二级渠道')]
+  未添加渠道选项:
+    by: text
+    value: 未添加
+    exact: false
+  配置表:
+    by: css
+    value: table.score-table
+  配置表渠道行:
+    by: css
+    value: table.score-table tbody tr
+  页面:
+    by: css
+    value: body
+  AI清洗评分:
+    by: xpath
+    value: //table[.//th[normalize-space()='清洗方式'] and .//th[contains(normalize-space(),'得分')]]
+  已清洗次数评分:
+    by: xpath
+    value: //table[.//th[contains(normalize-space(),'清洗次数') or contains(normalize-space(),'累计清洗')]
+      and .//th[contains(normalize-space(),'得分')]]
   维度分层与层差保存校验:
     by: text
     value: 维度分层与层差保存校验
@@ -58,47 +57,74 @@ elements:
     value: button
     name: 修改日志
     exact: true
-  修改:
+  场景维度矩阵:
     by: css
-    value: button:has-text('修改')
-  获客渠道评分维度开关:
+    value: table.score-table.score-scene-table
+  清洗场景一:
     by: css
-    value: .el-switch
-  AI清洗评分维度开关:
+    value: table.score-scene-table tbody tr:first-child
+  清洗场景二:
     by: css
-    value: .el-switch
-  层差阻断提示:
-    by: text
-    value: 层差
-    exact: false
-  渠道选择器:
-    by: css
-    value: button.el-button--small:has-text('添加渠道')
-  清洗次数档位:
-    by: xpath
-    value: //*[contains(text(),'清洗次数档位')]
-  修改日志列表:
+    value: table.score-scene-table tbody tr:nth-child(2)
+  添加渠道:
     by: role
     value: button
-    name: 修改日志
+    name: 添加渠道
     exact: true
-  层差不通过提示:
+  获客渠道得分输入框:
     by: xpath
-    value: //*[contains(text(),'层差') and contains(text(),'不通过')]
-  一级:
+    value: //table[.//th[contains(normalize-space(),'一级渠道')]]//input[contains(@class,'el-input__inner')
+      or true]
+  保存:
+    by: role
+    value: button
+    name: 保存
+    exact: true
+  移除:
     by: css
-    value: '#tab-score'
-  二级:
+    value: table.score-table button[aria-label='移除']
+  取消:
+    by: role
+    value: button
+    name: 取消
+    exact: true
+  得分输入框:
     by: css
-    value: '#tab-score'
+    value: table.score-table input.el-input__inner
+  AI清洗得分输入框:
+    by: xpath
+    value: //table[.//th[normalize-space()='清洗方式']]//input
+  渠道选择器:
+    by: css
+    value: .el-dialog:visible .el-dialog__body
+  渠道搜索框:
+    by: css
+    value: .el-dialog:visible input[placeholder*='搜索']
   已添加渠道选项:
-    by: text
-    value: 已添加
-    exact: false
-  未添加渠道选项:
-    by: text
-    value: 未添加
-    exact: false
-  配置表渠道行:
+    by: css
+    value: .el-dialog:visible .el-checkbox
+  已添加渠道勾选框:
+    by: css
+    value: .el-dialog:visible .el-checkbox
+  已清洗次数得分输入框:
     by: xpath
-    value: //table//tbody/tr
+    value: //table[contains(@class,'score-table')]//tr[contains(.,'未清洗') or contains(.,'首次清洗')
+      or contains(.,'二次清洗')]//input
+  层差阻断提示:
+    by: css
+    value: .el-dialog
+  修改日志列表:
+    by: css
+    value: .el-dialog .el-table
+  保存成功:
+    by: css
+    value: .el-message:visible
+  保存成功提示:
+    by: css
+    value: .el-message:visible
+  获客渠道评分维度开关:
+    by: xpath
+    value: //table[contains(@class,'score-scene-table')]//th[normalize-space()='获客渠道评分']/following::tbody//label[contains(@class,'el-checkbox')][1]
+  AI清洗评分维度开关:
+    by: xpath
+    value: //table[contains(@class,'score-scene-table')]//th[normalize-space()='AI清洗评分']/following::tbody//label[contains(@class,'el-checkbox')][1]

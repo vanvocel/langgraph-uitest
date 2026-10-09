@@ -15,7 +15,11 @@ from framework.agents.discover.collect import (
     needs_login,
 )
 from framework.agents.discover.llm_candidates import ask_locator_candidates
-from framework.agents.discover.reveal import apply_reveal_steps, unique_reveal_paths
+from framework.agents.discover.reveal import (
+    apply_reveal_steps,
+    dismiss_overlays,
+    unique_reveal_paths,
+)
 from framework.agents.discover.snapshot import snapshot_text
 from framework.agents.discover.write_pom import load_existing_elements, write_bindings, write_pom
 from framework.bootstrap.login import ensure_logged_in, storage_state_for
@@ -58,6 +62,40 @@ def _try_open_batch_dialog(page: Page) -> None:
             page.wait_for_timeout(600)
     except Exception:  # noqa: BLE001
         return
+
+
+_CHANNEL_DIALOG_NAMES = {
+    "渠道选择器",
+    "渠道搜索框",
+    "确认添加",
+    "已添加渠道勾选框",
+    "已添加渠道选项",
+    "未添加渠道选项",
+    "一级",
+    "二级",
+}
+
+_LAYER_DIALOG_NAMES = {
+    "层差校验弹窗",
+    "层差不通过提示",
+    "返回调整",
+    "已知风险仍保存",
+    "二次确认",
+}
+
+
+def _try_click_button(page: Page, name: str) -> bool:
+    try:
+        btn = page.get_by_role("button", name=name, exact=True)
+        for i in range(min(btn.count(), 6)):
+            item = btn.nth(i)
+            if item.is_visible() and item.is_enabled():
+                item.click(timeout=4000)
+                page.wait_for_timeout(600)
+                return True
+    except Exception:  # noqa: BLE001
+        pass
+    return False
 
 
 def _bind_pending(
@@ -209,7 +247,28 @@ def _discover_with_reveal(
             bound.update(more)
             scores.update(more_scores)
 
+        # If channel-dialog names remain but path did not open picker, try once.
+        if still and _CHANNEL_DIALOG_NAMES.intersection(still):
+            if "添加渠道" not in "|".join(applied):
+                if _try_click_button(page, "添加渠道"):
+                    applied.append("click_ok:添加渠道(extra)")
+                    page.wait_for_timeout(500)
+            more, still, more_scores = _bind_pending(page, still)
+            bound.update(more)
+            scores.update(more_scores)
+
+        # Layer-diff dialog: click 保存 once if those names remain unbound.
+        if still and _LAYER_DIALOG_NAMES.intersection(still):
+            if "保存" not in "|".join(applied):
+                if _try_click_button(page, "保存"):
+                    applied.append("click_ok:保存(extra)")
+                    page.wait_for_timeout(700)
+            more, still, more_scores = _bind_pending(page, still)
+            bound.update(more)
+            scores.update(more_scores)
+
         llm_bound_here: list[str] = []
+        # LLM only on remaining names at this UI state (smaller, more accurate).
         if still and llm_profile and llm_profile.has_key:
             more, still, more_scores, err = _llm_bind_remaining(
                 page, still, profile=llm_profile
@@ -221,11 +280,13 @@ def _discover_with_reveal(
             if err:
                 llm_error = err
 
+        dismissed = dismiss_overlays(page)
         path_logs.append(
             {
                 "from_case": case_id,
                 "reveal": applied,
-                "bound_now": sorted(found.keys()) + llm_bound_here,
+                "dismiss": dismissed,
+                "bound_now": sorted(set(list(found.keys()) + llm_bound_here)),
                 "still": list(still),
             }
         )

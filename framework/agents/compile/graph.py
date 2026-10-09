@@ -9,6 +9,7 @@ from typing import Any, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
+from framework.agents.compile.lint import lint_compiled
 from framework.agents.compile.prompt import SYSTEM_PROMPT
 from framework.agents.compile.stub import stub_compile
 from framework.llm.profiles import LlmProfile, compile_backend, resolve_profile
@@ -189,6 +190,7 @@ def node_parse(state: CompileState) -> CompileState:
         if not isinstance(raw, dict):
             raise ValueError("compile output is not an object")
         raw = normalize_compiled(raw)
+        raw, _lint_notes = lint_compiled(raw, nl_text)
         case = UiCase.model_validate(raw)
         meta = dict(case.meta or {})
         meta["compile_backend"] = backend

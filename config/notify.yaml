@@ -1,0 +1,34 @@
+# Test report notification. Sent automatically after `python main.py run`,
+# or via `python main.py notify --req <id>`.
+# Secrets stay in .env — do not put App Secret here.
+
+enabled: true
+# If true, skip when there is no failed case and exit_code==0
+only_on_failure: false
+
+# Public URL for Allure HTML (preferred over uploading huge HTML to Feishu).
+# Map this URL prefix to the project's runs/ directory on the server, e.g.:
+#   nginx: location /reports/ { alias /opt/LangGraph-uitest/runs/; }
+# Then REPORT_BASE_URL=https://uitest.example.com/reports
+# opens https://uitest.example.com/reports/MG0557/allure-report.html
+report_url:
+  base_url_env: REPORT_BASE_URL
+  # Optional override. Default: {req_id}/allure-report.html (or index under allure-report/)
+  # html_path_template: "{req_id}/allure-report.html"
+
+channels:
+  feishu:
+    enabled: true
+    app_id_env: FEISHU_APP_ID
+    app_secret_env: FEISHU_APP_SECRET
+    chat_id_env: FEISHU_CHAT_ID
+    send_summary: true
+    upload_excel: true
+    # Keep false when report_url is set — send link instead of 50MB+ HTML
+    upload_html: false
+
+  email:
+    enabled: false
+
+  wecom:
+    enabled: false

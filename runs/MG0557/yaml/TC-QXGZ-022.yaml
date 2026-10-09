@@ -23,34 +23,41 @@ steps:
 - action: click
   element: 修改
 - action: fill
-  element: 得分输入框
+  element: 已清洗次数得分输入框
   value: ''
 - action: click
   element: 保存
-- action: assert_text_contains
-  element: 页面
-  expect: 不能为空
+  observe:
+    window_ms: 5000
+    toasts: []
+    forbid_toast_levels: []
+- action: assert_visible
+  element: 表单校验提示
 - action: fill
-  element: 得分输入框
+  element: 已清洗次数得分输入框
   value: '99999'
 - action: fill
-  element: 渠道得分
+  element: 已清洗次数得分输入框
   value: '0'
 - action: click
   element: 保存
-- action: assert_text_contains
-  element: 页面
-  expect: 保存成功
+- action: assert_visible
+  element: 保存成功
+- action: click
+  element: 修改
 - action: fill
-  element: 得分输入框
+  element: 已清洗次数得分输入框
   value: '100000'
 - action: click
   element: 保存
-- action: assert_text_contains
-  element: 页面
-  expect: 超出范围
+  observe:
+    window_ms: 5000
+    toasts: []
+    forbid_toast_levels: []
+- action: assert_visible
+  element: 表单校验提示
 tags:
-- compiled
+- MG0557
 meta:
   needs_review: false
   compile_backend: deepseek

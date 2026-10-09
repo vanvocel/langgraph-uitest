@@ -67,9 +67,11 @@ steps:
   expect: '20'
 tags:
 - compiled
+- needs_fixture
 meta:
   needs_review: true
   review_notes: 依赖主数据存在两个不同一级下同名二级渠道（一级A/二级X、一级B/二级X）且均符合候选过滤条件，需人工造数或 Mock 数据；选择器与配置表以「一级
     / 二级」区分同名二级的展示细节需人工核对。
   compile_backend: deepseek
   llm_profile: deepseek
+  needs_fixture: true

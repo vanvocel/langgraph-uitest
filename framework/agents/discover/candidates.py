@@ -36,6 +36,8 @@ def iter_candidates(name: str) -> Iterator[LocatorDef]:
         yield LocatorDef(by="css", value="body")
         return
     if name in {"列表表格", "表格"}:
+        yield LocatorDef(by="css", value="table.score-table")
+        yield LocatorDef(by="css", value=".score-table")
         yield LocatorDef(by="css", value=".el-table")
         yield LocatorDef(by="css", value="table")
         return
@@ -75,13 +77,164 @@ def iter_candidates(name: str) -> Iterator[LocatorDef]:
         yield LocatorDef(by="text", value="获客渠道评分", exact=True)
         yield LocatorDef(by="xpath", value=f"//*[contains(normalize-space(),{_xq(name)})]")
         return
+    # Live title may be「AI外呼评分」; semantic YAML name is often「AI清洗评分」.
+    if name in {"AI清洗评分", "AI外呼评分"}:
+        yield LocatorDef(
+            by="xpath",
+            value=(
+                "//table[.//th[normalize-space()='清洗方式'] "
+                "and .//th[contains(normalize-space(),'得分')]]"
+            ),
+        )
+        yield LocatorDef(
+            by="xpath",
+            value="//*[normalize-space()='AI外呼评分']/following::table[1]",
+        )
+        yield LocatorDef(
+            by="xpath",
+            value="//*[normalize-space()='AI清洗评分']/following::table[1]",
+        )
+        yield LocatorDef(by="text", value="AI外呼评分", exact=True)
+        yield LocatorDef(by="text", value="AI清洗评分", exact=True)
+        return
+    if name in {"已清洗次数评分"}:
+        yield LocatorDef(
+            by="xpath",
+            value=(
+                "//table[.//th[contains(normalize-space(),'清洗次数') "
+                "or contains(normalize-space(),'累计清洗')] "
+                "and .//th[contains(normalize-space(),'得分')]]"
+            ),
+        )
+        yield LocatorDef(
+            by="xpath",
+            value="//*[normalize-space()='已清洗次数评分']/following::table[1]",
+        )
+        yield LocatorDef(by="text", value="已清洗次数评分", exact=True)
+        return
     if name in {"取消"}:
         yield LocatorDef(by="role", value="button", name="取消", exact=True)
         yield LocatorDef(by="text", value="取消", exact=True)
         yield LocatorDef(by="css", value="button:has-text('取消')")
         return
+    if name in {"得分输入框", "渠道得分"}:
+        yield LocatorDef(by="css", value="table.score-table input.el-input__inner")
+        yield LocatorDef(by="css", value="table.score-table .el-input__inner")
+        yield LocatorDef(by="css", value="table.score-table input")
+        yield LocatorDef(by="css", value=".score-table input.el-input__inner")
+        yield LocatorDef(by="css", value=".score-table input")
+        return
+    if name in {"获客渠道得分输入框"}:
+        yield LocatorDef(
+            by="xpath",
+            value=(
+                "//table[.//th[contains(normalize-space(),'一级渠道')]"
+                "]//input[contains(@class,'el-input__inner') or true]"
+            ),
+        )
+        yield LocatorDef(
+            by="css",
+            value="table.score-table:has(th:has-text('一级渠道')) input",
+        )
+        return
+    if name in {"AI清洗得分输入框"}:
+        yield LocatorDef(
+            by="xpath",
+            value="//table[.//th[normalize-space()='清洗方式']]//input",
+        )
+        yield LocatorDef(
+            by="css",
+            value="table.score-table:has(th:has-text('清洗方式')) input",
+        )
+        return
+    if name in {"已清洗次数得分输入框"}:
+        yield LocatorDef(
+            by="xpath",
+            value=(
+                "//table[.//th[contains(normalize-space(),'清洗次数')"
+                " or contains(normalize-space(),'累计清洗')]]//input"
+            ),
+        )
+        yield LocatorDef(
+            by="css",
+            value="table.score-table:has(th:has-text('清洗次数')) input",
+        )
+        return
+    if name in {"渠道选择器"}:
+        yield LocatorDef(by="css", value=".el-dialog:visible .el-cascader")
+        yield LocatorDef(by="css", value=".el-dialog:visible .el-tree")
+        yield LocatorDef(by="css", value=".el-dialog:visible .el-select")
+        yield LocatorDef(by="css", value=".el-dialog:visible .el-dialog__body")
+        yield LocatorDef(by="css", value="[role='dialog'] .el-cascader")
+        return
+    if name in {"渠道搜索框"}:
+        yield LocatorDef(by="css", value=".el-dialog:visible input[placeholder*='搜索']")
+        yield LocatorDef(by="css", value=".el-dialog:visible .el-input__inner")
+        yield LocatorDef(by="css", value=".el-dialog:visible input")
+        yield LocatorDef(by="placeholder", value="搜索")
+        return
+    if name in {"确认添加"}:
+        yield LocatorDef(by="role", value="button", name="确认添加", exact=True)
+        yield LocatorDef(by="text", value="确认添加", exact=True)
+        yield LocatorDef(by="css", value=".el-dialog:visible button:has-text('确认添加')")
+        return
+    if name in {"已添加渠道勾选框", "已添加渠道选项"}:
+        yield LocatorDef(by="css", value=".el-dialog:visible .el-checkbox")
+        yield LocatorDef(by="css", value=".el-dialog:visible .el-checkbox__label")
+        yield LocatorDef(by="role", value="checkbox", name="已添加", exact=False)
+        return
+    if name in {"未添加渠道选项"}:
+        yield LocatorDef(by="css", value=".el-dialog:visible .el-checkbox")
+        yield LocatorDef(by="css", value=".el-dialog:visible .el-checkbox__label")
+        yield LocatorDef(by="text", value="未添加", exact=False)
+        return
+    if name in {"配置表"}:
+        yield LocatorDef(by="css", value="table.score-table")
+        yield LocatorDef(by="css", value=".score-table")
+        yield LocatorDef(by="css", value=".el-table")
+        return
+    if name in {"配置表渠道行"}:
+        yield LocatorDef(by="css", value="table.score-table tbody tr")
+        yield LocatorDef(by="css", value=".score-table tbody tr")
+        yield LocatorDef(by="css", value=".el-table__body tbody tr:not(.el-table__empty-row)")
+        return
+    if name in {"层差校验弹窗", "层差不通过提示", "二次确认"}:
+        yield LocatorDef(by="css", value=".el-dialog:visible")
+        yield LocatorDef(by="css", value=".el-message-box:visible")
+        yield LocatorDef(by="css", value="[role='dialog']")
+        yield LocatorDef(by="text", value=name, exact=False)
+        return
+    if name in {"返回调整", "已知风险仍保存"}:
+        yield LocatorDef(by="role", value="button", name=name, exact=True)
+        yield LocatorDef(by="text", value=name, exact=True)
+        yield LocatorDef(by="css", value=f".el-dialog:visible button:has-text('{name}')")
+        return
+    if name in {"保存成功", "保存成功提示"}:
+        yield LocatorDef(by="css", value=".el-message:visible")
+        yield LocatorDef(by="css", value=".el-notification:visible")
+        yield LocatorDef(by="text", value="保存成功", exact=False)
+        return
+    if name in {"表单校验提示", "校验提示"}:
+        yield LocatorDef(by="css", value=".el-form-item__error")
+        yield LocatorDef(by="css", value=".el-form-item__error:visible")
+        yield LocatorDef(by="css", value=".el-message--error:visible")
+        yield LocatorDef(by="css", value=".el-message-box:visible")
+        return
+    if name in {"添加渠道"}:
+        yield LocatorDef(by="role", value="button", name="添加渠道", exact=True)
+        yield LocatorDef(by="text", value="添加渠道", exact=True)
+        return
+    if name in {"一级", "二级"}:
+        yield LocatorDef(by="role", value="tab", name=name, exact=True)
+        yield LocatorDef(by="css", value=".el-dialog:visible .el-tabs__item")
+        yield LocatorDef(
+            by="xpath",
+            value=f"//th[normalize-space()={_xq(name)} or contains(normalize-space(),{_xq(name+'渠道')})]",
+        )
+        yield LocatorDef(by="text", value=name, exact=True)
+        return
     # Short action names that are prefixes of others (修改 vs 修改日志) — exact only.
-    if name in {"修改", "保存", "添加", "删除", "查询", "重置", "导出"}:
+    if name in {"修改", "保存", "添加", "删除", "查询", "重置", "导出", "确认"}:
         yield LocatorDef(by="role", value="button", name=name, exact=True)
         yield LocatorDef(by="text", value=name, exact=True)
         return
@@ -116,6 +269,23 @@ def _css_attr(text: str) -> str:
     if "'" not in text:
         return f"'{text}'"
     return f'"{text}"'
+
+
+def _controlish(element_name: str) -> bool:
+    n = element_name or ""
+    return any(
+        key in n
+        for key in (
+            "输入框",
+            "搜索框",
+            "选择器",
+            "勾选",
+            "开关",
+            "按钮",
+            "得分输入",
+            "渠道得分",
+        )
+    )
 
 
 def _semantic_ok(element_name: str, locator: LocatorDef) -> bool:
@@ -170,6 +340,49 @@ def validate_locator(
                 in_aside = False
             if in_aside and locator.by in {"text", "placeholder", "label"}:
                 continue
+            try:
+                kind = item.evaluate(
+                    """el => {
+                      const tag = (el.tagName || '').toLowerCase();
+                      const cls = String(el.className || '');
+                      const role = (el.getAttribute('role') || '').toLowerCase();
+                      const help = !!(
+                        el.closest('.score-note') || el.closest('.el-alert')
+                        || cls.includes('score-note') || cls.includes('el-alert')
+                      );
+                      const hasInput = !!(
+                        el.matches('input,textarea,[contenteditable="true"]')
+                        || el.querySelector('input,textarea,[contenteditable="true"]')
+                      );
+                      const hasCheckbox = !!(
+                        el.matches('input[type=checkbox],.el-checkbox,[role=checkbox]')
+                        || el.querySelector('input[type=checkbox],.el-checkbox,[role=checkbox]')
+                      );
+                      const isDialog = !!(
+                        el.closest('.el-dialog,.el-message-box,[role=dialog]')
+                        || role === 'dialog'
+                        || cls.includes('el-dialog')
+                      );
+                      return {tag, help, hasInput, hasCheckbox, isDialog};
+                    }"""
+                )
+            except Exception:  # noqa: BLE001
+                kind = {}
+            tag = str((kind or {}).get("tag") or "")
+            if element_name and _controlish(element_name):
+                if tag in {"th", "td", "thead", "caption"}:
+                    continue
+                if kind.get("help"):
+                    continue
+                if ("输入" in element_name or "搜索框" in element_name or "渠道得分" in element_name) and not kind.get(
+                    "hasInput"
+                ):
+                    continue
+                if "勾选" in element_name and not kind.get("hasCheckbox"):
+                    continue
+            if element_name and ("弹窗" in element_name or element_name in {"二次确认"}):
+                if not kind.get("isDialog"):
+                    continue
             # Reject non-exact role/text hits whose accessible name is a longer
             # sibling (e.g. name=修改 matching 修改日志).
             if element_name and locator.exact is False and locator.by in {"role", "text"}:

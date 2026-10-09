@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from framework.agents.compile.graph import compile_nl, normalize_compiled
+from framework.agents.compile.lint import lint_compiled
 from framework.llm.profiles import resolve_profile
 from framework.schema.case import UiCase
 
@@ -66,4 +67,54 @@ def test_normalize_compiled_headers_and_aliases():
     assert out["steps"][2]["element"] == "列表表格"
     assert out["steps"][3]["element"] == "弹窗关闭"
     assert out["meta"]["needs_review"] is False
+    UiCase.model_validate(out)
+
+
+def test_lint_rewrites_page_assert_and_score_input():
+    nl = (
+        "用例 TC-QXGZ-015：【AI清洗评分】分值支持0-99999且不能为空\n"
+        "预期：空值、-1、100000 无法通过校验；0 与 99999 可保存成功。\n"
+    )
+    raw = {
+        "case_id": "TC-QXGZ-015",
+        "title": "t",
+        "requirement_id": "MG0557",
+        "steps": [
+            {"action": "open", "url": "https://lead.z-niu.com/rule/clean/"},
+            {"action": "fill", "element": "得分输入框", "value": ""},
+            {"action": "click", "element": "保存"},
+            {"action": "assert_text_contains", "element": "页面", "expect": "不能为空"},
+            {"action": "fill", "element": "得分输入框", "value": "0"},
+            {"action": "click", "element": "保存"},
+            {"action": "assert_text_contains", "element": "页面", "expect": "保存成功"},
+        ],
+    }
+    out, notes = lint_compiled(raw, nl)
+    assert out["steps"][1]["element"] == "AI清洗得分输入框"
+    assert out["steps"][3]["action"] == "assert_visible"
+    assert out["steps"][3]["element"] == "表单校验提示"
+    assert out["steps"][2]["observe"]["forbid_toast_levels"] == []
+    assert out["steps"][6]["action"] == "assert_visible"
+    assert out["steps"][6]["element"] == "保存成功"
+    assert notes
+    UiCase.model_validate(out)
+
+
+def test_lint_keeps_expect_from_nl_outcome():
+    nl = "用例 TC-QXGZ-005：【获客渠道评分】\n预期：无法通过校验并提示合法范围；可保存成功。\n"
+    raw = {
+        "case_id": "TC-QXGZ-005",
+        "title": "t",
+        "requirement_id": "MG0557",
+        "steps": [
+            {"action": "open", "url": "https://example.com/"},
+            {"action": "click", "element": "保存"},
+            {"action": "assert_text_contains", "element": "页面", "expect": "合法范围"},
+            {"action": "assert_headers", "element": "列表表格", "expect": "一级渠道,得分"},
+        ],
+    }
+    out, _notes = lint_compiled(raw, nl)
+    assert out["steps"][2]["element"] == "表单校验提示"
+    assert out["steps"][2]["expect"] == "合法范围"
+    assert out["steps"][3]["element"] == "获客渠道评分"
     UiCase.model_validate(out)

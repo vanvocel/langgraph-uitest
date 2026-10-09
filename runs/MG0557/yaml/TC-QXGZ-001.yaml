@@ -25,19 +25,10 @@ steps:
 - action: assert_visible
   element: 获客渠道评分
 - action: assert_headers
-  element: 列表表格
+  element: 获客渠道评分
   expect: 一级渠道,二级渠道,得分
 - action: assert_column
-  element: 列表表格
-  expect: gte:0
-- action: assert_column
-  element: 列表表格
-  expect: gte:0
-- action: assert_column
-  element: 列表表格
-  expect: gte:0
-- action: assert_column
-  element: 列表表格
+  element: 得分
   expect: gte:0
 - action: assert_hidden
   element: 添加渠道

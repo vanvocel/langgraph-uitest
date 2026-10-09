@@ -20,6 +20,8 @@ reveal_paths:
   - open:fixture://page.html
   - wait:查询
   - click_ok:查询
+  dismiss:
+  - escape
   bound_now:
   - 查询
   still: []

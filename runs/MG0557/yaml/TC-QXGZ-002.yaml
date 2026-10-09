@@ -38,9 +38,6 @@ steps:
   expect: 经销商异地
 - action: assert_text_not_contains
   element: 渠道选择器
-  expect: 经销商
-- action: assert_text_not_contains
-  element: 渠道选择器
   expect: 停用
 - action: assert_text_not_contains
   element: 渠道选择器

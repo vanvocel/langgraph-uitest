@@ -3,7 +3,7 @@ needed:
 - 清洗评分规则
 - 各维度评分配置
 - 获客渠道评分
-- 列表表格
+- 得分
 - 添加渠道
 - 修改
 - 渠道选择器
@@ -16,25 +16,17 @@ needed:
 - 确认添加
 - 配置表
 - 配置表渠道行
-- 得分输入框
+- 获客渠道得分输入框
 - 保存
-- 页面
+- 表单校验提示
 - 保存成功
 - 移除
 - 取消
-- 一级A / 二级X
-- 渠道得分
-- 一级B / 二级X
-- 获客渠道管理
-- 渠道G
-- 一级渠道名称
-- 二级渠道名称
-- 排序号
-- 渠道G-新二级
 - AI清洗评分
+- 得分输入框
+- AI清洗得分输入框
 - 已清洗次数评分
-- 清洗次数档位
-- 得分
+- 已清洗次数得分输入框
 - 场景维度矩阵
 - 清洗场景一
 - 获客渠道评分维度开关
@@ -44,529 +36,197 @@ needed:
 - 保存成功提示
 - 修改日志
 - 修改日志列表
-- 高层级档位分差
-- 层差校验弹窗
-- 返回调整
-- 已知风险仍保存
-- 层差不通过提示
-- 配置值
-- 二次确认
-- 确认
 - 层差阻断提示
+- 页面
 bound:
-  清洗评分规则:
-    by: role
-    value: tab
-    name: 清洗评分规则
-    exact: true
-    confidence: 0.95
-  各维度评分配置:
-    by: text
-    value: 各维度评分配置
-    name: null
-    exact: true
-    confidence: 0.95
-  获客渠道评分:
-    by: css
-    value: table.score-table
-    name: null
-    exact: null
-    confidence: 0.8
-  列表表格:
-    by: css
-    value: table
-    name: null
-    exact: null
-    confidence: 0.8
-  添加渠道:
-    by: role
-    value: button
-    name: 添加渠道
-    exact: true
-    confidence: 0.95
-  保存:
-    by: role
-    value: button
-    name: 保存
-    exact: true
-    confidence: 0.95
-  页面:
-    by: css
-    value: body
-    name: null
-    exact: null
-    confidence: 0.95
-  移除:
-    by: css
-    value: table.score-table button[aria-label='移除']
-    name: null
-    exact: null
-    confidence: 0.8
-  取消:
-    by: role
-    value: button
-    name: 取消
-    exact: true
-    confidence: 0.95
-  AI清洗评分:
-    by: text
-    value: AI清洗评分
-    name: null
-    exact: true
-    confidence: 0.8
-  已清洗次数评分:
-    by: text
-    value: 已清洗次数评分
-    name: null
-    exact: true
-    confidence: 0.8
-  得分:
-    by: text
-    value: 得分
-    name: null
-    exact: true
-    confidence: 0.8
-  维度分层与层差保存校验:
-    by: text
-    value: 维度分层与层差保存校验
-    name: null
-    exact: true
-    confidence: 0.95
-  修改日志:
-    by: role
-    value: button
-    name: 修改日志
-    exact: true
-    confidence: 0.95
-  修改:
-    by: css
-    value: button:has-text('修改')
-    name: null
-    exact: null
-    confidence: 0.8
   获客渠道评分维度开关:
-    by: css
-    value: .el-switch
+    by: xpath
+    value: //table[contains(@class,'score-scene-table')]//th[normalize-space()='获客渠道评分']/following::tbody//label[contains(@class,'el-checkbox')][1]
     name: null
     exact: null
     confidence: 0.8
   AI清洗评分维度开关:
-    by: css
-    value: .el-switch
+    by: xpath
+    value: //table[contains(@class,'score-scene-table')]//th[normalize-space()='AI清洗评分']/following::tbody//label[contains(@class,'el-checkbox')][1]
     name: null
     exact: null
     confidence: 0.8
-  层差阻断提示:
-    by: text
-    value: 层差
-    name: null
-    exact: false
-    confidence: 0.8
-  渠道选择器:
-    by: css
-    value: button.el-button--small:has-text('添加渠道')
-    name: null
-    exact: null
-    confidence: 0.95
-  清洗次数档位:
-    by: xpath
-    value: //*[contains(text(),'清洗次数档位')]
-    name: null
-    exact: null
-    confidence: 0.95
-  修改日志列表:
-    by: role
-    value: button
-    name: 修改日志
-    exact: true
-    confidence: 0.95
-  层差不通过提示:
-    by: xpath
-    value: //*[contains(text(),'层差') and contains(text(),'不通过')]
-    name: null
-    exact: null
-    confidence: 0.95
-  一级:
-    by: css
-    value: '#tab-score'
-    name: null
-    exact: null
-    confidence: 0.95
-  二级:
-    by: css
-    value: '#tab-score'
-    name: null
-    exact: null
-    confidence: 0.95
-  已添加渠道选项:
-    by: text
-    value: 已添加
-    name: null
-    exact: false
-    confidence: 0.95
-  未添加渠道选项:
-    by: text
-    value: 未添加
-    name: null
-    exact: false
-    confidence: 0.95
-  配置表渠道行:
-    by: xpath
-    value: //table//tbody/tr
-    name: null
-    exact: null
-    confidence: 0.8
-kept: []
-unbound:
+kept:
+- 清洗评分规则
+- 各维度评分配置
+- 获客渠道评分
+- 得分
+- 添加渠道
+- 修改
+- 渠道选择器
+- 一级
+- 二级
 - 渠道搜索框
+- 已添加渠道选项
 - 已添加渠道勾选框
-- 确认添加
+- 未添加渠道选项
 - 配置表
-- 得分输入框
+- 配置表渠道行
+- 获客渠道得分输入框
+- 保存
 - 保存成功
-- 一级A / 二级X
-- 渠道得分
-- 一级B / 二级X
-- 获客渠道管理
-- 渠道G
-- 一级渠道名称
-- 二级渠道名称
-- 排序号
-- 渠道G-新二级
+- 移除
+- 取消
+- AI清洗评分
+- 得分输入框
+- AI清洗得分输入框
+- 已清洗次数评分
+- 已清洗次数得分输入框
 - 场景维度矩阵
 - 清洗场景一
 - 清洗场景二
+- 维度分层与层差保存校验
 - 保存成功提示
-- 高层级档位分差
-- 层差校验弹窗
-- 返回调整
-- 已知风险仍保存
-- 配置值
-- 二次确认
-- 确认
+- 修改日志
+- 修改日志列表
+- 层差阻断提示
+- 页面
+unbound:
+- 确认添加
+- 表单校验提示
 blocked: true
 backend: deepseek
 llm_profile: deepseek
 llm_error: null
 reveal_paths:
-- from_case: TC-QXGZ-002
-  reveal:
-  - open:https://lead.z-niu.com/rule/clean/
-  - wait:清洗评分规则
-  - click_ok:清洗评分规则
-  - click_ok:修改
-  bound_now:
-  - AI清洗评分
-  - 保存
-  - 修改日志
-  - 列表表格
-  - 取消
-  - 各维度评分配置
-  - 已清洗次数评分
-  - 得分
-  - 添加渠道
-  - 清洗评分规则
-  - 移除
-  - 维度分层与层差保存校验
-  - 获客渠道评分
-  - 页面
-  - 修改
-  - 获客渠道评分维度开关
-  - AI清洗评分维度开关
-  - 层差阻断提示
-  still:
-  - 渠道选择器
-  - 一级
-  - 二级
-  - 渠道搜索框
-  - 已添加渠道选项
-  - 已添加渠道勾选框
-  - 未添加渠道选项
-  - 确认添加
-  - 配置表
-  - 配置表渠道行
-  - 得分输入框
-  - 保存成功
-  - 一级A / 二级X
-  - 渠道得分
-  - 一级B / 二级X
-  - 获客渠道管理
-  - 渠道G
-  - 一级渠道名称
-  - 二级渠道名称
-  - 排序号
-  - 渠道G-新二级
-  - 清洗次数档位
-  - 场景维度矩阵
-  - 清洗场景一
-  - 清洗场景二
-  - 保存成功提示
-  - 修改日志列表
-  - 高层级档位分差
-  - 层差校验弹窗
-  - 返回调整
-  - 已知风险仍保存
-  - 层差不通过提示
-  - 配置值
-  - 二次确认
-  - 确认
-- from_case: TC-QXGZ-013
-  reveal:
-  - open:https://lead.z-niu.com/rule/clean/
-  - wait:清洗评分规则
-  - click_ok:清洗评分规则
-  - wait:获客渠道评分
-  - click_fail:获客渠道管理
-  - wait_skip:渠道G
-  - click_fail:渠道G
-  - click_ok:修改
-  bound_now:
-  - 渠道选择器
-  - 清洗次数档位
-  - 修改日志列表
-  - 层差不通过提示
-  still:
-  - 一级
-  - 二级
-  - 渠道搜索框
-  - 已添加渠道选项
-  - 已添加渠道勾选框
-  - 未添加渠道选项
-  - 确认添加
-  - 配置表
-  - 配置表渠道行
-  - 得分输入框
-  - 保存成功
-  - 一级A / 二级X
-  - 渠道得分
-  - 一级B / 二级X
-  - 获客渠道管理
-  - 渠道G
-  - 一级渠道名称
-  - 二级渠道名称
-  - 排序号
-  - 渠道G-新二级
-  - 场景维度矩阵
-  - 清洗场景一
-  - 清洗场景二
-  - 保存成功提示
-  - 高层级档位分差
-  - 层差校验弹窗
-  - 返回调整
-  - 已知风险仍保存
-  - 配置值
-  - 二次确认
-  - 确认
 - from_case: TC-QXGZ-001
   reveal:
   - open:https://lead.z-niu.com/rule/clean/
   - wait:清洗评分规则
   - click_ok:清洗评分规则
   - wait:各维度评分配置
-  bound_now:
-  - 一级
-  - 二级
-  - 已添加渠道选项
-  - 未添加渠道选项
+  dismiss:
+  - escape
+  bound_now: []
   still:
-  - 渠道搜索框
-  - 已添加渠道勾选框
   - 确认添加
-  - 配置表
-  - 配置表渠道行
-  - 得分输入框
-  - 保存成功
-  - 一级A / 二级X
-  - 渠道得分
-  - 一级B / 二级X
-  - 获客渠道管理
-  - 渠道G
-  - 一级渠道名称
-  - 二级渠道名称
-  - 排序号
-  - 渠道G-新二级
-  - 场景维度矩阵
-  - 清洗场景一
-  - 清洗场景二
-  - 保存成功提示
-  - 高层级档位分差
-  - 层差校验弹窗
-  - 返回调整
-  - 已知风险仍保存
-  - 配置值
-  - 二次确认
-  - 确认
+  - 表单校验提示
+  - 获客渠道评分维度开关
+  - AI清洗评分维度开关
 - from_case: TC-QXGZ-014
   reveal:
   - open:https://lead.z-niu.com/rule/clean/
   - wait:清洗评分规则
   - click_ok:清洗评分规则
   - wait:AI清洗评分
-  bound_now:
-  - 配置表渠道行
+  dismiss:
+  - escape
+  bound_now: []
   still:
-  - 渠道搜索框
-  - 已添加渠道勾选框
   - 确认添加
-  - 配置表
-  - 得分输入框
-  - 保存成功
-  - 一级A / 二级X
-  - 渠道得分
-  - 一级B / 二级X
-  - 获客渠道管理
-  - 渠道G
-  - 一级渠道名称
-  - 二级渠道名称
-  - 排序号
-  - 渠道G-新二级
-  - 场景维度矩阵
-  - 清洗场景一
-  - 清洗场景二
-  - 保存成功提示
-  - 高层级档位分差
-  - 层差校验弹窗
-  - 返回调整
-  - 已知风险仍保存
-  - 配置值
-  - 二次确认
-  - 确认
+  - 表单校验提示
+  - 获客渠道评分维度开关
+  - AI清洗评分维度开关
 - from_case: TC-QXGZ-021
   reveal:
   - open:https://lead.z-niu.com/rule/clean/
   - wait:清洗评分规则
   - click_ok:清洗评分规则
   - wait:已清洗次数评分
+  dismiss:
+  - escape
   bound_now: []
   still:
-  - 渠道搜索框
-  - 已添加渠道勾选框
   - 确认添加
-  - 配置表
-  - 得分输入框
-  - 保存成功
-  - 一级A / 二级X
-  - 渠道得分
-  - 一级B / 二级X
-  - 获客渠道管理
-  - 渠道G
-  - 一级渠道名称
-  - 二级渠道名称
-  - 排序号
-  - 渠道G-新二级
-  - 场景维度矩阵
-  - 清洗场景一
-  - 清洗场景二
-  - 保存成功提示
-  - 高层级档位分差
-  - 层差校验弹窗
-  - 返回调整
-  - 已知风险仍保存
-  - 配置值
-  - 二次确认
-  - 确认
+  - 表单校验提示
+  - 获客渠道评分维度开关
+  - AI清洗评分维度开关
 - from_case: TC-QXGZ-027
   reveal:
   - open:https://lead.z-niu.com/rule/clean/
   - wait:清洗评分规则
   - click_ok:清洗评分规则
   - wait_skip:场景维度矩阵
+  dismiss:
+  - escape
   bound_now: []
   still:
-  - 渠道搜索框
-  - 已添加渠道勾选框
   - 确认添加
-  - 配置表
-  - 得分输入框
-  - 保存成功
-  - 一级A / 二级X
-  - 渠道得分
-  - 一级B / 二级X
-  - 获客渠道管理
-  - 渠道G
-  - 一级渠道名称
-  - 二级渠道名称
-  - 排序号
-  - 渠道G-新二级
-  - 场景维度矩阵
-  - 清洗场景一
-  - 清洗场景二
-  - 保存成功提示
-  - 高层级档位分差
-  - 层差校验弹窗
-  - 返回调整
-  - 已知风险仍保存
-  - 配置值
-  - 二次确认
-  - 确认
+  - 表单校验提示
+  - 获客渠道评分维度开关
+  - AI清洗评分维度开关
 - from_case: TC-QXGZ-028
   reveal:
   - open:https://lead.z-niu.com/rule/clean/
   - wait:清洗评分规则
   - click_ok:清洗评分规则
   - wait:维度分层与层差保存校验
+  dismiss:
+  - escape
   bound_now: []
   still:
-  - 渠道搜索框
-  - 已添加渠道勾选框
   - 确认添加
-  - 配置表
-  - 得分输入框
-  - 保存成功
-  - 一级A / 二级X
-  - 渠道得分
-  - 一级B / 二级X
-  - 获客渠道管理
-  - 渠道G
-  - 一级渠道名称
-  - 二级渠道名称
-  - 排序号
-  - 渠道G-新二级
-  - 场景维度矩阵
-  - 清洗场景一
-  - 清洗场景二
-  - 保存成功提示
-  - 高层级档位分差
-  - 层差校验弹窗
-  - 返回调整
-  - 已知风险仍保存
-  - 配置值
-  - 二次确认
-  - 确认
-- from_case: TC-QXGZ-031
+  - 表单校验提示
+  - 获客渠道评分维度开关
+  - AI清洗评分维度开关
+- from_case: TC-QXGZ-005
   reveal:
   - open:https://lead.z-niu.com/rule/clean/
   - wait:清洗评分规则
   - click_ok:清洗评分规则
-  - wait_skip:层差不通过提示
-  - click_fail:返回调整
+  - click_ok:修改
+  - click_ok:添加渠道(extra)
+  dismiss:
+  - escape
+  - click:取消
+  - escape
   bound_now: []
   still:
-  - 渠道搜索框
-  - 已添加渠道勾选框
   - 确认添加
-  - 配置表
-  - 得分输入框
-  - 保存成功
-  - 一级A / 二级X
-  - 渠道得分
-  - 一级B / 二级X
-  - 获客渠道管理
-  - 渠道G
-  - 一级渠道名称
-  - 二级渠道名称
-  - 排序号
-  - 渠道G-新二级
-  - 场景维度矩阵
-  - 清洗场景一
-  - 清洗场景二
-  - 保存成功提示
-  - 高层级档位分差
-  - 层差校验弹窗
-  - 返回调整
-  - 已知风险仍保存
-  - 配置值
-  - 二次确认
-  - 确认
+  - 表单校验提示
+  - 获客渠道评分维度开关
+  - AI清洗评分维度开关
+- from_case: TC-QXGZ-006
+  reveal:
+  - open:https://lead.z-niu.com/rule/clean/
+  - wait:清洗评分规则
+  - click_ok:清洗评分规则
+  - click_ok:修改
+  - wait:获客渠道评分
+  - wait:移除
+  - click_ok:添加渠道(extra)
+  dismiss:
+  - escape
+  - click:取消
+  - escape
+  bound_now:
+  - AI清洗评分维度开关
+  - 获客渠道评分维度开关
+  still:
+  - 确认添加
+  - 表单校验提示
+- from_case: TC-QXGZ-002
+  reveal:
+  - open:https://lead.z-niu.com/rule/clean/
+  - wait:清洗评分规则
+  - click_ok:清洗评分规则
+  - click_ok:修改
+  - click_ok:添加渠道
+  dismiss:
+  - escape
+  - click:取消
+  - escape
+  bound_now: []
+  still:
+  - 确认添加
+  - 表单校验提示
+- from_case: TC-QXGZ-033
+  reveal:
+  - open:https://lead.z-niu.com/rule/clean/
+  - wait:清洗评分规则
+  - click_ok:清洗评分规则
+  - click_ok:修改
+  - click_ok:保存
+  dismiss:
+  - escape
+  bound_now: []
+  still:
+  - 确认添加
+  - 表单校验提示
 mode: reveal_path
 pom: D:\Project\AI\LangGraph-uitest\runs\MG0557\pom\elements.yaml

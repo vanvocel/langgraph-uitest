@@ -59,11 +59,18 @@ def compile_requirement(
     *,
     llm_profile: str | None = None,
     force_backend: str = "",
+    case_ids: list[str] | None = None,
 ) -> list[dict]:
     """NL → yaml/<case_id>.yaml. Overwrites any existing file with the same name."""
     init_requirement(req_id)
     base = req_dir(req_id)
     nl_files = list_nl_files(base / "nl")
+    wanted = {c.strip() for c in (case_ids or []) if c and str(c).strip()}
+    if wanted:
+        nl_files = [p for p in nl_files if _nl_stem(p) in wanted]
+        missing = wanted - {_nl_stem(p) for p in nl_files}
+        if missing:
+            raise FileNotFoundError(f"NL not found for: {', '.join(sorted(missing))}")
     if not nl_files:
         raise FileNotFoundError(f"no NL files under {base / 'nl'}")
 
