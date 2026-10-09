@@ -1,6 +1,4 @@
-# Hand-bound from live probe 2026-10-08 (rule/clean → 清洗评分规则).
-# 修改 must use exact=true so it does not match 修改日志.
-page: CleanScoreRulePage
+page: MG0557
 url: https://lead.z-niu.com/rule/clean/
 elements:
   清洗评分规则:
@@ -8,19 +6,16 @@ elements:
     value: tab
     name: 清洗评分规则
     exact: true
-  页面:
+  各维度评分配置:
+    by: text
+    value: 各维度评分配置
+    exact: true
+  获客渠道评分:
     by: css
-    value: body
-  修改:
-    by: role
-    value: button
-    name: 修改
-    exact: true
-  修改日志:
-    by: role
-    value: button
-    name: 修改日志
-    exact: true
+    value: table.score-table
+  列表表格:
+    by: css
+    value: table
   添加渠道:
     by: role
     value: button
@@ -31,27 +26,79 @@ elements:
     value: button
     name: 保存
     exact: true
-  弹窗取消:
-    by: xpath
-    value: "//div[contains(@class,'el-overlay')]//button[normalize-space()='取消']"
+  页面:
+    by: css
+    value: body
+  移除:
+    by: css
+    value: table.score-table button[aria-label='移除']
   取消:
-    by: xpath
-    value: "//button[normalize-space()='取消' and not(ancestor::*[contains(@class,'el-overlay')])]"
-  渠道选择器:
-    by: xpath
-    value: "//div[contains(@class,'el-dialog')][.//*[contains(normalize-space(),'添加渠道')] or .//input[contains(@placeholder,'渠道')]]"
-  渠道搜索框:
-    by: placeholder
-    value: 搜索一级 / 二级渠道名称
-  获客渠道评分表:
-    by: text
-    value: 获客渠道评分
+    by: role
+    value: button
+    name: 取消
     exact: true
-  AI清洗评分表:
+  AI清洗评分:
     by: text
     value: AI清洗评分
     exact: true
-  已清洗次数评分表:
+  已清洗次数评分:
     by: text
     value: 已清洗次数评分
     exact: true
+  得分:
+    by: text
+    value: 得分
+    exact: true
+  维度分层与层差保存校验:
+    by: text
+    value: 维度分层与层差保存校验
+    exact: true
+  修改日志:
+    by: role
+    value: button
+    name: 修改日志
+    exact: true
+  修改:
+    by: css
+    value: button:has-text('修改')
+  获客渠道评分维度开关:
+    by: css
+    value: .el-switch
+  AI清洗评分维度开关:
+    by: css
+    value: .el-switch
+  层差阻断提示:
+    by: text
+    value: 层差
+    exact: false
+  渠道选择器:
+    by: css
+    value: button.el-button--small:has-text('添加渠道')
+  清洗次数档位:
+    by: xpath
+    value: //*[contains(text(),'清洗次数档位')]
+  修改日志列表:
+    by: role
+    value: button
+    name: 修改日志
+    exact: true
+  层差不通过提示:
+    by: xpath
+    value: //*[contains(text(),'层差') and contains(text(),'不通过')]
+  一级:
+    by: css
+    value: '#tab-score'
+  二级:
+    by: css
+    value: '#tab-score'
+  已添加渠道选项:
+    by: text
+    value: 已添加
+    exact: false
+  未添加渠道选项:
+    by: text
+    value: 未添加
+    exact: false
+  配置表渠道行:
+    by: xpath
+    value: //table//tbody/tr

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import time
+from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 from urllib.parse import urljoin
@@ -24,21 +25,67 @@ class ToolContext:
         elements: dict[str, LocatorDef],
         base_url: str | None = None,
         fixture_dir: Path | None = None,
+        live_bind: bool = False,
+        live_bind_llm: bool = True,
+        pom_path: Path | None = None,
+        on_live_bind: Callable[[str, LocatorDef, float], None] | None = None,
     ) -> None:
         self.page = page
         self.elements = elements
         self.base_url = (base_url or "").rstrip("/")
         self.fixture_dir = fixture_dir
         self.vars: dict[str, list[str] | str] = {}
+        self.live_bind = live_bind
+        self.live_bind_llm = live_bind_llm
+        self.pom_path = pom_path
+        self.on_live_bind = on_live_bind
+        self.live_bound: dict[str, LocatorDef] = {}
+
+    def _try_live_bind(
+        self,
+        element_name: str,
+        *,
+        exclude_current: bool = False,
+    ) -> LocatorDef | None:
+        if not self.live_bind:
+            return None
+        from framework.agents.discover.live_bind import live_bind_element, persist_binding
+
+        exclude = self.elements.get(element_name) if exclude_current else None
+        hit = live_bind_element(
+            self.page,
+            element_name,
+            use_llm=self.live_bind_llm,
+            exclude=exclude,
+        )
+        if hit is None:
+            return None
+        loc, score = hit
+        self.elements[element_name] = loc
+        self.live_bound[element_name] = loc
+        if self.pom_path is not None:
+            try:
+                persist_binding(self.pom_path, element_name, loc)
+            except Exception:  # noqa: BLE001
+                pass
+        if self.on_live_bind is not None:
+            try:
+                self.on_live_bind(element_name, loc, score)
+            except Exception:  # noqa: BLE001
+                pass
+        return loc
 
     def get_locator(self, element_name: str):
         loc_def = self.elements.get(element_name)
         if loc_def is None:
-            raise StepError(
-                FailureCode.BIND_ERROR,
-                f"element not in POM: {element_name!r}",
-                element=element_name,
-            )
+            # Missing from POM → JIT bind on current page state only.
+            loc_def = self._try_live_bind(element_name)
+            if loc_def is None:
+                raise StepError(
+                    FailureCode.BIND_ERROR,
+                    f"element not in POM: {element_name!r}",
+                    element=element_name,
+                )
         try:
             return resolve_locator(self.page, loc_def)
         except StepError:
@@ -98,11 +145,39 @@ def tool_open(ctx: ToolContext, step: Step) -> None:
 def tool_click(ctx: ToolContext, step: Step) -> None:
     assert step.element
     loc = ctx.get_locator(step.element)
+    timeout = step.timeout_ms or 5000
+    # Prefer a visible+enabled match whose text equals the element name when possible
+    # (avoids clicking 修改日志 when POM says 修改 with exact=false).
+    target = loc.first
     try:
-        loc.first.click(timeout=step.timeout_ms)
+        want = "".join((step.element or "").split())
+        n = min(loc.count(), 8)
+        for i in range(n):
+            item = loc.nth(i)
+            try:
+                if not item.is_visible() or not item.is_enabled():
+                    continue
+            except Exception:  # noqa: BLE001
+                continue
+            if want:
+                try:
+                    text = "".join((item.inner_text() or "").split())
+                    aria = "".join((item.get_attribute("aria-label") or "").split())
+                except Exception:  # noqa: BLE001
+                    text = aria = ""
+                if text and text != want and want in text:
+                    continue
+                if aria and aria != want and want in aria:
+                    continue
+            target = item
+            break
+    except Exception:  # noqa: BLE001
+        target = loc.first
+    try:
+        target.click(timeout=timeout)
     except Exception as exc:  # noqa: BLE001
         try:
-            loc.first.click(timeout=step.timeout_ms or 5000, force=True)
+            target.click(timeout=timeout, force=True)
             return
         except Exception:
             pass
@@ -299,15 +374,38 @@ def tool_hover(ctx: ToolContext, step: Step) -> None:
 def tool_wait_visible(ctx: ToolContext, step: Step) -> None:
     assert step.element
     loc = ctx.get_locator(step.element)
+    timeout = step.timeout_ms or 30000
+    # With live_bind: spend most of the budget on POM first; only then try alternates.
+    first_timeout = max(timeout * 2 // 3, 8000) if ctx.live_bind else timeout
+    first_exc: Exception | None = None
     try:
-        loc.first.wait_for(state="visible", timeout=step.timeout_ms)
+        loc.first.wait_for(state="visible", timeout=first_timeout)
+        return
     except Exception as exc:  # noqa: BLE001
-        raise StepError(
-            FailureCode.ASSERT_FAIL,
-            f"wait_visible failed: {step.element!r}: {exc}",
-            action=step.action.value,
-            element=step.element,
-        ) from exc
+        first_exc = exc
+    if ctx.live_bind:
+        rebound = ctx._try_live_bind(step.element, exclude_current=True)
+        if rebound is not None:
+            try:
+                resolve_locator(ctx.page, rebound).first.wait_for(
+                    state="visible", timeout=min(timeout, 15000)
+                )
+                return
+            except Exception as exc:  # noqa: BLE001
+                first_exc = exc
+        elif first_timeout < timeout:
+            # No alternate; spend remaining budget on original locator.
+            try:
+                loc.first.wait_for(state="visible", timeout=timeout - first_timeout)
+                return
+            except Exception as exc:  # noqa: BLE001
+                first_exc = exc
+    raise StepError(
+        FailureCode.ASSERT_FAIL,
+        f"wait_visible failed: {step.element!r}: {first_exc}",
+        action=step.action.value,
+        element=step.element,
+    )
 
 
 def tool_assert_visible(ctx: ToolContext, step: Step) -> None:

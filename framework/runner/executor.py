@@ -59,18 +59,37 @@ def execute_case(
     pom_dir: Path,
     log_dir: Path,
     req_id: str,
+    live_bind: bool = True,
 ) -> None:
     pom = load_pom(pom_dir)
     fixture_dir = pom_dir.parent / "fixtures"
     shot_dir = log_dir / "screenshots"
+    pom_path = pom_dir / "elements.yaml"
+    logger = RunLogger(log_dir / f"{case.case_id}.jsonl", case_id=case.case_id, req_id=req_id)
+
+    def _on_live_bind(name: str, loc, score: float) -> None:
+        logger.write(
+            "live_bind",
+            element=name,
+            by=loc.by,
+            value=loc.value,
+            name_attr=loc.name,
+            confidence=score,
+        )
+
     ctx = ToolContext(
         page,
-        elements=pom.elements,
+        elements=dict(pom.elements),
         base_url=case.base_url or pom.url,
         fixture_dir=fixture_dir if fixture_dir.is_dir() else None,
+        live_bind=live_bind,
+        # JIT uses heuristics only; LLM discover owns POM writes.
+        live_bind_llm=False,
+        # Do not overwrite discover POM from flaky runtime binds.
+        pom_path=None,
+        on_live_bind=_on_live_bind,
     )
-    logger = RunLogger(log_dir / f"{case.case_id}.jsonl", case_id=case.case_id, req_id=req_id)
-    logger.write("case_start", title=case.title, steps=len(case.steps))
+    logger.write("case_start", title=case.title, steps=len(case.steps), live_bind=live_bind)
 
     allure.dynamic.epic(case.requirement_id or req_id)
     allure.dynamic.feature(case.case_id)
@@ -106,15 +125,75 @@ def execute_case(
                     if observe is not None and cursor is not None:
                         toasts = judge_observe(page, observe, cursor, ctx)
                 except StepError as err:
-                    err.step_index = index
-                    err.action = err.action or step.action.value
-                    err.element = err.element or step.element
-                    fail_name = f"断言失败 [{index}] {step.action.value}"
-                    case_png = _attach_failure(
-                        page, logger, err, shot_dir / f"{case.case_id}_{index:02d}_fail.png", shot_name=fail_name
-                    )
-                    case_png_name = fail_name
-                    step_error = err
+                    # One JIT rebind + retry when locator miss / wait fails.
+                    retried = False
+                    if (
+                        live_bind
+                        and err.code in {FailureCode.BIND_ERROR, FailureCode.ASSERT_FAIL}
+                        and step.element
+                        and step.action
+                        in {
+                            ActionName.wait_visible,
+                            ActionName.click,
+                            ActionName.click_if_visible,
+                            ActionName.fill,
+                            ActionName.assert_visible,
+                        }
+                    ):
+                        rebound = ctx._try_live_bind(
+                            step.element,
+                            exclude_current=step.element in ctx.elements,
+                        )
+                        if rebound is not None:
+                            try:
+                                run_action(ctx, step)
+                                toasts = []
+                                if observe is not None and cursor is not None:
+                                    toasts = judge_observe(page, observe, cursor, ctx)
+                                retried = True
+                                logger.write(
+                                    "step_retry_ok",
+                                    step_index=index,
+                                    element=step.element,
+                                    via="live_bind",
+                                )
+                            except StepError as err2:
+                                err = err2
+                            except Exception as exc:  # noqa: BLE001
+                                err = StepError(
+                                    FailureCode.UNKNOWN,
+                                    str(exc),
+                                    step_index=index,
+                                    action=step.action.value,
+                                    element=step.element,
+                                )
+                    if retried:
+                        if _is_assert(step.action):
+                            png_name = f"断言通过 [{index}] {step.action.value}"
+                            case_png = _attach_screenshot(
+                                page,
+                                png_name,
+                                dest=shot_dir / f"{case.case_id}_{index:02d}_{step.action.value}.png",
+                            )
+                            case_png_name = png_name
+                        logger.write(
+                            "step_ok",
+                            step_index=index,
+                            action=step.action.value,
+                            url=page.url,
+                            toasts=toasts,
+                            live_bind_retry=True,
+                        )
+                    else:
+                        err.step_index = index
+                        err.action = err.action or step.action.value
+                        err.element = err.element or step.element
+                        fail_name = f"断言失败 [{index}] {step.action.value}"
+                        case_png = _attach_failure(
+                            page, logger, err, shot_dir / f"{case.case_id}_{index:02d}_fail.png", shot_name=fail_name
+                        )
+                        case_png_name = fail_name
+                        step_error = err
                 except Exception as exc:  # noqa: BLE001
                     err = StepError(
                         FailureCode.UNKNOWN,

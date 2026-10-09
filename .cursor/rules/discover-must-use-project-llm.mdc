@@ -1,0 +1,34 @@
+---
+description: POM discover must use project CLI/LLM only; agent must not hand-bind locators
+alwaysApply: true
+---
+
+# Discover 必须走项目模型
+
+## 强制要求
+
+绑定 / 补全 POM（`runs/<req>/pom/elements.yaml`）时：
+
+1. **只允许**通过项目 CLI 执行，例如：
+   ```bash
+   python main.py discover --req <REQ> --force --llm deepseek
+   ```
+   （或 `config/llm.yaml` 中配置的其它 profile，如 zhipu/gpt）
+2. **禁止**助手自行「discover」：
+   - 禁止手写 / 臆造定位器并写入 `pom/elements.yaml` 冒充 discover 结果
+   - 禁止用临时 probe 脚本扫 DOM 后批量补 POM 当作正式 discover
+   - 禁止用聊天模型直接生成 xpath/css 填进 POM 来替代 `main.py discover`
+
+## 目的
+
+用户要检查 **项目内配置的大模型 discover** 会出现什么问题。自行绑 POM 会掩盖这些问题。
+
+## 允许的例外
+
+- 用户**明确要求**手工改某个 locator（例如已知现网是图标按钮）时，可改单个元素，并注明「非 discover，人工对齐现网」。
+- 运行 `discover` 后若有 unbound，应把 **bound / unbound 列表与报错原样汇报**，等用户决定下一步；不要擅自补绑。
+
+## 与 compile 的关系
+
+- NL→YAML：`python main.py compile --req <REQ> --llm <profile>`（项目模型）
+- YAML 元素→POM：`python main.py discover --req <REQ> --force --llm <profile>`（项目模型）

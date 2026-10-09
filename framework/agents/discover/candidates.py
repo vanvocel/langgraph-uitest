@@ -59,6 +59,44 @@ def iter_candidates(name: str) -> Iterator[LocatorDef]:
         yield LocatorDef(by="text", value="下载中心", exact=True)
         yield LocatorDef(by="role", value="button", name="下载中心", exact=True)
         return
+    # Icon-only delete in score / edit tables (visible text often absent).
+    if name in {"移除", "删除图标", "删除行"}:
+        yield LocatorDef(by="css", value="table.score-table button[aria-label='移除']")
+        yield LocatorDef(by="css", value=".score-operation-column button[aria-label='移除']")
+        yield LocatorDef(by="css", value="button[aria-label='移除']")
+        yield LocatorDef(by="css", value="[aria-label='移除']")
+        yield LocatorDef(by="role", value="button", name="移除", exact=True)
+        yield LocatorDef(by="xpath", value=f"//*[@aria-label={_xq(name)}]")
+        return
+    if name in {"获客渠道评分"}:
+        # Prefer the score table itself — section title text is often off-screen / nested.
+        yield LocatorDef(by="css", value="table.score-table")
+        yield LocatorDef(by="css", value=".score-table")
+        yield LocatorDef(by="text", value="获客渠道评分", exact=True)
+        yield LocatorDef(by="xpath", value=f"//*[contains(normalize-space(),{_xq(name)})]")
+        return
+    if name in {"取消"}:
+        yield LocatorDef(by="role", value="button", name="取消", exact=True)
+        yield LocatorDef(by="text", value="取消", exact=True)
+        yield LocatorDef(by="css", value="button:has-text('取消')")
+        return
+    # Short action names that are prefixes of others (修改 vs 修改日志) — exact only.
+    if name in {"修改", "保存", "添加", "删除", "查询", "重置", "导出"}:
+        yield LocatorDef(by="role", value="button", name=name, exact=True)
+        yield LocatorDef(by="text", value=name, exact=True)
+        return
+    # Known page tabs — prefer role=tab over bare text (avoids sidebar / heading hits).
+    if name in {
+        "清洗评分规则",
+        "人工待清洗",
+        "AI外呼待清洗",
+        "AI 外呼待清洗",
+        "清洗记录",
+        "已清洗客资",
+    }:
+        yield LocatorDef(by="role", value="tab", name=name, exact=True)
+        yield LocatorDef(by="text", value=name, exact=True)
+        return
 
     for role in _ROLE_BUTTONISH:
         yield LocatorDef(by="role", value=role, name=name, exact=True)
@@ -66,12 +104,44 @@ def iter_candidates(name: str) -> Iterator[LocatorDef]:
     yield LocatorDef(by="placeholder", value=name)
     yield LocatorDef(by="label", value=name, exact=True)
     yield LocatorDef(by="testid", value=name)
+    yield LocatorDef(by="css", value=f"[aria-label={_css_attr(name)}]")
+    yield LocatorDef(by="xpath", value=f"//*[@aria-label={_xq(name)}]")
     yield LocatorDef(by="xpath", value=_form_control_xpath(name))
+    # Non-exact role last; validate_locator rejects prefix collisions.
     for role in _ROLE_BUTTONISH:
         yield LocatorDef(by="role", value=role, name=name, exact=False)
 
 
-def validate_locator(page: Page, locator: LocatorDef) -> float | None:
+def _css_attr(text: str) -> str:
+    if "'" not in text:
+        return f"'{text}'"
+    return f'"{text}"'
+
+
+def _semantic_ok(element_name: str, locator: LocatorDef) -> bool:
+    """Reject role/text candidates whose label clearly belongs to another control."""
+    if locator.by in {"css", "xpath", "id", "testid"}:
+        return True
+    needle = "".join((element_name or "").split())
+    if not needle:
+        return True
+    hay = "".join(((locator.name or locator.value or "")).split())
+    if not hay:
+        return True
+    # Allow substring either way (e.g. name=获客渠道评分维度开关 vs 获客渠道评分).
+    if needle in hay or hay in needle:
+        return True
+    return False
+
+
+def validate_locator(
+    page: Page,
+    locator: LocatorDef,
+    *,
+    element_name: str | None = None,
+) -> float | None:
+    if element_name and not _semantic_ok(element_name, locator):
+        return None
     try:
         loc = resolve_locator(page, locator)
         count = loc.count()
@@ -100,6 +170,19 @@ def validate_locator(page: Page, locator: LocatorDef) -> float | None:
                 in_aside = False
             if in_aside and locator.by in {"text", "placeholder", "label"}:
                 continue
+            # Reject non-exact role/text hits whose accessible name is a longer
+            # sibling (e.g. name=修改 matching 修改日志).
+            if element_name and locator.exact is False and locator.by in {"role", "text"}:
+                try:
+                    acc = (item.inner_text() or "").strip() or (
+                        item.get_attribute("aria-label") or ""
+                    ).strip()
+                except Exception:  # noqa: BLE001
+                    acc = ""
+                compact_name = "".join(element_name.split())
+                compact_acc = "".join(acc.split())
+                if compact_acc and compact_acc != compact_name and compact_name in compact_acc:
+                    continue
             chosen = item
             break
         except Exception:  # noqa: BLE001
@@ -111,17 +194,29 @@ def validate_locator(page: Page, locator: LocatorDef) -> float | None:
     return 0.8
 
 
+def _same_locator(a: LocatorDef, b: LocatorDef) -> bool:
+    return (
+        a.by == b.by
+        and a.value == b.value
+        and a.name == b.name
+        and bool(a.exact) == bool(b.exact)
+    )
+
+
 def bind_element(
     page: Page,
     name: str,
     *,
     extra: list[LocatorDef] | None = None,
+    exclude: LocatorDef | None = None,
 ) -> tuple[LocatorDef, float] | None:
     best: tuple[LocatorDef, float] | None = None
     # LLM / extra candidates first (often more specific), then heuristics.
     ordered = list(extra or []) + list(iter_candidates(name))
     for cand in ordered:
-        score = validate_locator(page, cand)
+        if exclude is not None and _same_locator(cand, exclude):
+            continue
+        score = validate_locator(page, cand, element_name=name)
         if score is None:
             continue
         if score >= 0.9:

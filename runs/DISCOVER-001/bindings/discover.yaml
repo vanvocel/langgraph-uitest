@@ -14,4 +14,14 @@ blocked: false
 backend: heuristic
 llm_profile: null
 llm_error: null
+reveal_paths:
+- from_case: TC-DISCOVER-001
+  reveal:
+  - open:fixture://page.html
+  - wait:查询
+  - click_ok:查询
+  bound_now:
+  - 查询
+  still: []
+mode: reveal_path
 pom: D:\Project\AI\LangGraph-uitest\runs\DISCOVER-001\pom\elements.yaml

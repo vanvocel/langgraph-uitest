@@ -268,8 +268,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_compile.add_argument("--req", required=True)
     p_compile.add_argument(
         "--llm",
-        default="deepseek",
-        help="LLM profile name in config/llm.yaml (default: deepseek)",
+        default=None,
+        help="LLM profile in config/llm.yaml (default: config active profile)",
     )
     p_compile.add_argument(
         "--allow-stub",
@@ -287,8 +287,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_discover.add_argument(
         "--llm",
-        default="deepseek",
-        help="LLM profile for unbound elements (default: deepseek)",
+        default=None,
+        help="LLM profile for unbound elements (default: config active profile)",
     )
     p_discover.add_argument(
         "--no-llm",

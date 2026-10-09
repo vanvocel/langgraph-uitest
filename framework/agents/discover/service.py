@@ -1,4 +1,4 @@
-"""Phase 5: YAML element names → validated POM locators (heuristics + optional LLM)."""
+"""Phase 5: YAML element names → validated POM locators via reveal-path + LLM."""
 
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ from framework.agents.discover.collect import (
     needs_login,
 )
 from framework.agents.discover.llm_candidates import ask_locator_candidates
+from framework.agents.discover.reveal import apply_reveal_steps, unique_reveal_paths
 from framework.agents.discover.snapshot import snapshot_text
 from framework.agents.discover.write_pom import load_existing_elements, write_bindings, write_pom
 from framework.bootstrap.login import ensure_logged_in, storage_state_for
@@ -22,7 +23,7 @@ from framework.browser.session import start_playwright
 from framework.llm.profiles import LlmProfile, resolve_profile
 from framework.paths import init_requirement, req_dir
 from framework.pom.loader import LocatorDef
-from framework.schema.case import ActionName, Step
+from framework.schema.case import ActionName, Step, UiCase
 from framework.tools.actions import ToolContext, tool_open
 
 
@@ -32,7 +33,7 @@ def _open_url(page: Page, url: str, fixture_dir: Path | None, base_url: str | No
 
 
 def _maybe_reveal(page: Page, name: str, loc: LocatorDef) -> None:
-    """Reveal filters/dialogs. Do NOT auto-click every tab — that hides other elements."""
+    """Reveal filters/dialogs after binding certain triggers."""
     if name in {"展开筛选"}:
         try:
             page.get_by_text("展开筛选", exact=True).first.click(timeout=2000)
@@ -47,37 +48,6 @@ def _maybe_reveal(page: Page, name: str, loc: LocatorDef) -> None:
                 page.wait_for_timeout(500)
         except Exception:  # noqa: BLE001
             return
-
-
-def _enter_primary_tab(page: Page, pending: list[str]) -> None:
-    """Enter the main working tab before binding action buttons."""
-    preferred = [
-        "清洗评分规则",
-        "人工待清洗",
-        "AI 外呼待清洗",
-        "清洗记录",
-        "已清洗客资",
-    ]
-    pending_set = set(pending)
-    # Map POM name → visible tab label
-    aliases = {"AI外呼待清洗": "AI 外呼待清洗"}
-    ordered: list[str] = []
-    for label in preferred:
-        pom_name = next((k for k, v in aliases.items() if v == label), label)
-        if label in pending_set or pom_name in pending_set or label in {
-            "人工待清洗",
-            "清洗评分规则",
-        }:
-            ordered.append(label)
-    for label in ordered:
-        try:
-            tab = page.get_by_role("tab", name=label)
-            if tab.count() and tab.first.is_visible():
-                tab.first.click(timeout=3000)
-                page.wait_for_timeout(500)
-                return
-        except Exception:  # noqa: BLE001
-            continue
 
 
 def _try_open_batch_dialog(page: Page) -> None:
@@ -122,6 +92,28 @@ def _bind_pending(
     return bound, left, scores
 
 
+def _llm_bind_remaining(
+    page: Page,
+    still: list[str],
+    *,
+    profile: LlmProfile,
+) -> tuple[dict[str, LocatorDef], list[str], dict[str, float], str]:
+    """Ask LLM for candidates on current snapshot, then validate on page."""
+    if not still:
+        return {}, still, {}, ""
+    try:
+        snap = snapshot_text(page)
+        llm_map = ask_locator_candidates(
+            element_names=still,
+            snapshot=snap,
+            profile=profile,
+        )
+        more, left, scores = _bind_pending(page, still, extras=llm_map)
+        return more, left, scores, ""
+    except Exception as exc:  # noqa: BLE001
+        return {}, still, {}, str(exc)
+
+
 def discover_on_page(
     page: Page,
     names: list[str],
@@ -130,37 +122,115 @@ def discover_on_page(
     force: bool,
     llm_profile: LlmProfile | None = None,
 ) -> tuple[dict[str, LocatorDef], list[str], dict[str, float], str, str]:
+    """Legacy single-snapshot bind (kept for tests / simple pages)."""
     pending = [name for name in names if force or name not in already]
-    _enter_primary_tab(page, pending)
+    # Prefer 清洗评分规则 tab when present
+    for label in ("清洗评分规则", "人工待清洗"):
+        try:
+            tab = page.get_by_role("tab", name=label)
+            if tab.count() and tab.first.is_visible():
+                tab.first.click(timeout=3000)
+                page.wait_for_timeout(500)
+                break
+        except Exception:  # noqa: BLE001
+            continue
     bound, still, scores = _bind_pending(page, pending)
     backend = "heuristic"
     llm_error = ""
 
     dialog_names = {"批量领取", "弹窗", "弹窗关闭", "弹窗_继续清洗"}
     if still and dialog_names.intersection(still):
-        _enter_primary_tab(page, pending)
         _try_open_batch_dialog(page)
         more, still, more_scores = _bind_pending(page, still)
         bound.update(more)
         scores.update(more_scores)
 
     if still and llm_profile and llm_profile.has_key:
-        try:
-            if dialog_names.intersection(still):
-                _try_open_batch_dialog(page)
-            snap = snapshot_text(page)
-            llm_map = ask_locator_candidates(
-                element_names=still,
-                snapshot=snap,
-                profile=llm_profile,
-            )
-            more, still, more_scores = _bind_pending(page, still, extras=llm_map)
+        more, still, more_scores, llm_error = _llm_bind_remaining(
+            page, still, profile=llm_profile
+        )
+        bound.update(more)
+        scores.update(more_scores)
+        backend = llm_profile.name
+    return bound, still, scores, backend, llm_error
+
+
+def _discover_with_reveal(
+    page: Page,
+    cases: list[UiCase],
+    names: list[str],
+    *,
+    already: dict[str, Any],
+    force: bool,
+    fixture_dir: Path | None,
+    base_url: str | None,
+    llm_profile: LlmProfile | None,
+) -> tuple[dict[str, LocatorDef], list[str], dict[str, float], str, str, list[dict[str, Any]]]:
+    """Walk YAML reveal paths, bind at each reached UI state."""
+    pending = [n for n in names if force or n not in already]
+    bound: dict[str, LocatorDef] = {}
+    scores: dict[str, float] = {}
+    still = list(pending)
+    backend = "heuristic"
+    llm_error = ""
+    path_logs: list[dict[str, Any]] = []
+
+    paths = unique_reveal_paths(cases)
+    if not paths:
+        # Fallback: open first URL only
+        urls = collect_urls(cases)
+        if urls:
+            _open_url(page, urls[0], fixture_dir, base_url)
+            page.wait_for_timeout(600)
+        found, still, part_scores, backend, err = discover_on_page(
+            page, still, already={}, force=True, llm_profile=llm_profile
+        )
+        bound.update(found)
+        scores.update(part_scores)
+        if err:
+            llm_error = err
+        return bound, still, scores, backend, llm_error, path_logs
+
+    for case_id, steps in paths:
+        if not still:
+            break
+        applied = apply_reveal_steps(
+            page, steps, fixture_dir=fixture_dir, base_url=base_url
+        )
+        page.wait_for_timeout(400)
+        found, still, part_scores = _bind_pending(page, still)
+        bound.update(found)
+        scores.update(part_scores)
+
+        dialog_names = {"批量领取", "弹窗", "弹窗关闭", "弹窗_继续清洗"}
+        if still and dialog_names.intersection(still):
+            _try_open_batch_dialog(page)
+            more, still, more_scores = _bind_pending(page, still)
             bound.update(more)
             scores.update(more_scores)
+
+        llm_bound_here: list[str] = []
+        if still and llm_profile and llm_profile.has_key:
+            more, still, more_scores, err = _llm_bind_remaining(
+                page, still, profile=llm_profile
+            )
+            bound.update(more)
+            scores.update(more_scores)
+            llm_bound_here = list(more.keys())
             backend = llm_profile.name
-        except Exception as exc:  # noqa: BLE001
-            llm_error = str(exc)
-    return bound, still, scores, backend, llm_error
+            if err:
+                llm_error = err
+
+        path_logs.append(
+            {
+                "from_case": case_id,
+                "reveal": applied,
+                "bound_now": sorted(found.keys()) + llm_bound_here,
+                "still": list(still),
+            }
+        )
+
+    return bound, still, scores, backend, llm_error, path_logs
 
 
 def discover_requirement(
@@ -204,30 +274,23 @@ def discover_requirement(
 
     bound: dict[str, LocatorDef] = {}
     scores: dict[str, float] = {}
-    still = list(names)
+    still: list[str] = []
     backend = "heuristic"
     llm_error = ""
+    path_logs: list[dict[str, Any]] = []
     try:
         if account_ref:
             ensure_logged_in(page, account_ref=account_ref)
-        if not urls:
-            urls = [page.url] if page.url else []
-        for url in urls:
-            _open_url(page, url, fixture_dir, base_url)
-            page.wait_for_timeout(600)
-            found, still, part_scores, backend, err = discover_on_page(
-                page,
-                still,
-                already=already,
-                force=force,
-                llm_profile=profile,
-            )
-            bound.update(found)
-            scores.update(part_scores)
-            if err:
-                llm_error = err
-            if not still:
-                break
+        bound, still, scores, backend, llm_error, path_logs = _discover_with_reveal(
+            page,
+            cases,
+            names,
+            already=already,
+            force=force,
+            fixture_dir=fixture_dir,
+            base_url=base_url,
+            llm_profile=profile,
+        )
     finally:
         if owned_session:
             if context:
@@ -253,7 +316,13 @@ def discover_requirement(
         "req_id": req_id,
         "needed": names,
         "bound": {
-            k: {"by": v.by, "value": v.value, "name": v.name, "exact": v.exact, "confidence": scores.get(k)}
+            k: {
+                "by": v.by,
+                "value": v.value,
+                "name": v.name,
+                "exact": v.exact,
+                "confidence": scores.get(k),
+            }
             for k, v in bound.items()
         },
         "kept": skipped,
@@ -262,6 +331,8 @@ def discover_requirement(
         "backend": backend,
         "llm_profile": profile.name if profile else None,
         "llm_error": llm_error or None,
+        "reveal_paths": path_logs,
+        "mode": "reveal_path",
         "pom": str(pom_path),
     }
     write_bindings(base / "bindings" / "discover.yaml", report)
