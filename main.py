@@ -171,9 +171,37 @@ def cmd_excel_backfill(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_excel_to_nl(args: argparse.Namespace) -> int:
+    """Excel → NL markdown under runs/<req>/nl/ (no LLM)."""
+    from framework.agents.excel_nl.graph import run_excel_nl_graph
+
+    state = run_excel_nl_graph(
+        args.req,
+        excel=getattr(args, "excel", None),
+        page_url=getattr(args, "page_url", None),
+        tab=getattr(args, "tab", None),
+    )
+    errors = state.get("errors") or []
+    report = state.get("report") or {}
+    if errors or not report.get("ok"):
+        for err in errors:
+            print(f"ERROR: {err}")
+        return 1
+    print(f"excel-to-nl {args.req}: wrote {report.get('count', 0)} NL files")
+    print(f"  excel: {report.get('excel')}")
+    print(f"  nl_dir: {report.get('nl_dir')}")
+    if report.get("page_url") or report.get("tab"):
+        print(f"  page: {report.get('page_url') or '-'}  tab: {report.get('tab') or '-'}")
+    skipped = report.get("skipped") or {}
+    if skipped.get("ai_outbound"):
+        print(f"  ai_outbound: {len(skipped['ai_outbound'])}")
+    if skipped.get("needs_fixture"):
+        print(f"  needs_fixture: {len(skipped['needs_fixture'])}")
+    return 0
+
+
 def cmd_compile(args: argparse.Namespace) -> int:
     """NL → YAML via LLM (required). Stub only when --allow-stub (tests/debug)."""
-    from framework.agents.compile.service import compile_requirement
     from framework.llm.profiles import compile_backend, resolve_profile
 
     profile = resolve_profile(args.llm)
@@ -186,19 +214,47 @@ def cmd_compile(args: argparse.Namespace) -> int:
     if force == "llm" and not profile.has_key:
         print(f"ERROR: NL→YAML must use LLM, but {profile.api_key_env} is empty.")
         return 1
-    try:
-        results = compile_requirement(
+
+    from_excel = bool(getattr(args, "from_excel", False))
+    if from_excel:
+        from framework.agents.pipeline.graph import run_ingest_compile_pipeline
+
+        state = run_ingest_compile_pipeline(
             args.req,
+            excel=getattr(args, "excel", None),
+            page_url=getattr(args, "page_url", None),
+            tab=getattr(args, "tab", None),
             llm_profile=args.llm,
             force_backend=force,
-            case_ids=getattr(args, "case", None),
+            from_excel=True,
         )
-    except FileNotFoundError as exc:
-        print(exc)
-        return 1
-    except ValueError as exc:
-        print(f"ERROR: {exc}")
-        return 1
+        excel_report = state.get("excel_report") or {}
+        if state.get("errors") and not excel_report.get("ok"):
+            for err in state.get("errors") or []:
+                print(f"ERROR: {err}")
+            return 1
+        print(
+            f"excel-to-nl: wrote {excel_report.get('count', 0)} NL "
+            f"from {excel_report.get('excel')}"
+        )
+        results = state.get("compile_results") or []
+    else:
+        from framework.agents.compile.service import compile_requirement
+
+        try:
+            results = compile_requirement(
+                args.req,
+                llm_profile=args.llm,
+                force_backend=force,
+                case_ids=getattr(args, "case", None),
+            )
+        except FileNotFoundError as exc:
+            print(exc)
+            return 1
+        except ValueError as exc:
+            print(f"ERROR: {exc}")
+            return 1
+
     failed = 0
     review = 0
     for item in results:
@@ -314,6 +370,28 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_notify.set_defaults(func=cmd_notify)
 
+    p_excel_nl = sub.add_parser(
+        "excel-to-nl",
+        help="Excel → NL (MG0557-compatible headers; no LLM)",
+    )
+    p_excel_nl.add_argument("--req", required=True, help="Requirement id")
+    p_excel_nl.add_argument(
+        "--excel",
+        default=None,
+        help="Source Excel (default: runs/<req>/excel/cases.xlsx)",
+    )
+    p_excel_nl.add_argument(
+        "--page-url",
+        default=None,
+        help="Override page URL injected into NL (else runs/<req>/excel_nl.yaml)",
+    )
+    p_excel_nl.add_argument(
+        "--tab",
+        default=None,
+        help="Override tab name injected into NL",
+    )
+    p_excel_nl.set_defaults(func=cmd_excel_to_nl)
+
     p_compile = sub.add_parser(
         "compile",
         help="NL → YAML via LLM (required for all requirements)",
@@ -334,6 +412,26 @@ def build_parser() -> argparse.ArgumentParser:
         action="append",
         default=None,
         help="Only compile these case_id values (repeatable). Default: all NL files",
+    )
+    p_compile.add_argument(
+        "--from-excel",
+        action="store_true",
+        help="LangGraph pipeline: Excel→NL then NL→YAML",
+    )
+    p_compile.add_argument(
+        "--excel",
+        default=None,
+        help="With --from-excel: source Excel path",
+    )
+    p_compile.add_argument(
+        "--page-url",
+        default=None,
+        help="With --from-excel: page URL for generated NL",
+    )
+    p_compile.add_argument(
+        "--tab",
+        default=None,
+        help="With --from-excel: tab name for generated NL",
     )
     p_compile.set_defaults(func=cmd_compile)
 

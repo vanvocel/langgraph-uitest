@@ -1,5 +1,6 @@
 用例 TC-QXGZ-010：跨一级重名二级渠道按一级/二级名称区分展示与配置
 已登录（账号 default_tester）。
+【需造数】需造数/跨模块/故障注入/只读账号等前置，自动集暂不执行；编译时 tags 含 needs_fixture，meta.needs_fixture=true。
 页面入口：https://lead.z-niu.com/rule/clean/ ，进入页签【清洗评分规则】。
 前置：主数据存在两个不同一级下同名二级渠道（如一级A/二级X、一级B/二级X），且均符合候选过滤条件
 步骤（请逐步编译为 YAML，勿省略边界值/校验点）：

@@ -1,0 +1,29 @@
+# Excel → NL options for MG0557
+page_url: "https://lead.z-niu.com/rule/clean/"
+tab: "清洗评分规则"
+# Explicit skip lists (also auto-detect from Excel 测试说明/标题关键词)
+ai_outbound_ids:
+  - TC-QXGZ-016
+  - TC-QXGZ-017
+  - TC-QXGZ-019
+  - TC-QXGZ-025
+needs_fixture_ids:
+  - TC-QXGZ-004
+  - TC-QXGZ-007
+  - TC-QXGZ-008
+  - TC-QXGZ-009
+  - TC-QXGZ-010
+  - TC-QXGZ-011
+  - TC-QXGZ-012
+  - TC-QXGZ-013
+  - TC-QXGZ-018
+  - TC-QXGZ-020
+  - TC-QXGZ-023
+  - TC-QXGZ-024
+  - TC-QXGZ-026
+  - TC-QXGZ-030
+  - TC-QXGZ-031
+  - TC-QXGZ-032
+  - TC-QXGZ-034
+  - TC-QXGZ-035
+  - TC-QXGZ-036

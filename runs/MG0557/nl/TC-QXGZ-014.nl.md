@@ -1,5 +1,6 @@
 用例 TC-QXGZ-014：【AI清洗评分】仅展示一档最近一次为AI外呼且默认6000
 已登录（账号 default_tester）。
+【人工/AI外呼】依赖第三方 AI 外呼回传，自动集不执行；编译时 tags 含 manual,ai_outbound，meta.manual_only=true。
 页面入口：https://lead.z-niu.com/rule/clean/ ，进入页签【清洗评分规则】。
 前置：账号可进入【清洗评分规则】查看态或编辑态
 步骤（请逐步编译为 YAML，勿省略边界值/校验点）：

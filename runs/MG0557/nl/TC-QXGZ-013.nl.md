@@ -1,5 +1,6 @@
 用例 TC-QXGZ-013：主数据改名或调序后配置页与评分实时使用最新名称排序
 已登录（账号 default_tester）。
+【需造数】需造数/跨模块/故障注入/只读账号等前置，自动集暂不执行；编译时 tags 含 needs_fixture，meta.needs_fixture=true。
 页面入口：https://lead.z-niu.com/rule/clean/ ，进入页签【清洗评分规则】。
 前置：【获客渠道评分】已按二级渠道ID配置渠道G；可修改其一级/二级名称与排序号
 步骤（请逐步编译为 YAML，勿省略边界值/校验点）：

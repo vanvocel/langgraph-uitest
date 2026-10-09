@@ -1,5 +1,6 @@
 用例 TC-QXGZ-032：已知风险仍保存经二次确认后落库并标记层差风险日志
 已登录（账号 default_tester）。
+【需造数】需造数/跨模块/故障注入/只读账号等前置，自动集暂不执行；编译时 tags 含 needs_fixture，meta.needs_fixture=true。
 页面入口：https://lead.z-niu.com/rule/clean/ ，进入页签【清洗评分规则】。
 前置：已触发层差校验不通过弹窗；账号具备保存权限
 步骤（请逐步编译为 YAML，勿省略边界值/校验点）：
